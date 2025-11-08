@@ -1,0 +1,239 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+// datasource db {
+//   provider = "sqlite"
+//   url      = env("DATABASE_URL")
+// }
+//============================================
+// model Definitions
+//===================== Users ====================
+model Users_Mod {
+  usr_id     String    @unique @db.VarChar
+  usr_name   String    @db.VarChar
+  usr_email  String    @db.VarChar
+  usr_mbl    String?   @unique @db.VarChar
+  inp_dt     DateTime  @default(now()) @db.Timestamptz
+  pswd_hash  String?   @db.VarChar
+  last_login DateTime? @db.Timestamptz
+  is_active  Boolean?
+  inp_by     String?   @db.VarChar
+
+  @@map("users") // maps this Prisma model to the existing 'users' table
+}
+
+
+//===================================================
+// // Example model for posts
+model Posts_Mod {
+  post_id     Int       @unique @id
+  main_title  String
+  sub_title   String?
+  post_detl   String?
+  inp_by      String
+//  inp_dt  DateTime  @default(now())
+  
+  @@map("mn_posts")
+}
+
+model SubPosts_Mod {
+  sub_id    Int
+  post_id   Int
+  sub_detl  String
+//  inp_dt    DateTime @default(now())
+//  inp_by    String?
+
+  // Relation example (uncomment if Posts_Mod exists)
+  // post     Posts_Mod @relation(fields: [post_id], references: [post_id])
+
+  @@id([sub_id, post_id])          // ✅ composite primary key
+  @@map("mn_sub_posts")            // ✅ maps to your actual table name
+}
+
+// schema.prisma
+
+// model Prods_Mod {
+//   // Primary Key
+//   prd_cd       Int      @id @map("prd_cd") @db.Integer // Converted numeric (likely integer PK) to Int
+  
+//   // Required Fields
+//   bar_cd       String   @unique @map("bar_cd") @db.VarChar(255) // Assumed a unique identifier for a barcode
+//   prd_desc     String   @map("prd_desc") @db.VarChar(255)
+//   inp_by       String   @map("inp_by") @db.VarChar(255)
+//   prd_sku      String   @map("prd_sku") @db.Text
+//   prd_qoh      Float    @map("prd_qoh") @db.DoublePrecision // Converted numeric to Float
+//   prd_re_ord   Float    @map("prd_re_ord") @db.DoublePrecision // Converted numeric to Float
+//   prd_cat      String   @map("prd_cat") @db.VarChar(255)
+  
+//   // Optional/Nullable Fields
+//   prd_img_lnk  String?  @map("prd_img_lnk") @db.VarChar(255)
+//   prd_brand    String?  @map("prd_brand") @db.VarChar(255)
+//   max_rsp      Float?   @map("max_rsp") @db.DoublePrecision // Converted numeric to Float?
+//   min_rsp      Float?   @map("min_rsp") @db.DoublePrecision // Converted numeric to Float?
+//   tax_amt      Float?   @map("tax_amt") @db.DoublePrecision // Converted numeric to Float?
+//   pur_prc      Float?   @map("pur_prc") @db.DoublePrecision // Converted numeric to Float?
+//   disc_amt     Float?   @map("disc_amt") @db.DoublePrecision // Converted numeric to Float?
+//   disc_st_dt   Float?   @map("disc_st_dt") @db.DoublePrecision // Converted numeric to Float? (Check actual type)
+//   disc_end_dt  Float?   @map("disc_end_dt") @db.DoublePrecision // Converted numeric to Float? (Check actual type)
+//   exp_dt       DateTime? @map("exp_dt") @db.Date
+//   prd_lot_ref  String?  @map("prd_lot_ref") @db.VarChar(255)
+//   prd_status   String?  @map("prd_status") @db.VarChar(255)
+//   disc_pct     BigInt?  @map("disc_pct") @db.Integer
+//   max_pur_qty  BigInt?  @map("max_pur_qty") @db.Integer
+//   prd_stat     String?  @map("prd_stat") @db.Text
+// //  created_at   DateTime @default(now()) @map("created_at") @db.TimestampWithoutTimeZone(0)
+
+//   @@map("products") // Maps the Prisma model name Prods_Mod to the actual table name products
+// }
+
+model Prods_Mod {
+  prd_cd       Int       @id
+  bar_cd       String    
+  prd_desc     String    
+  inp_by       String    
+  prd_sku      String    
+  prd_qoh      Float     
+  prd_re_ord   Float     
+  prd_img_lnk  String?   
+  prd_cat      String    
+  prd_brand    String?   
+  max_rsp      Float?    
+  min_rsp      Float?    
+  tax_amt      Float?    
+  pur_prc      Float?    
+  disc_amt     Float?    
+  disc_st_dt   Float?    
+  disc_end_dt  Float?    
+  exp_dt       DateTime? 
+  prd_lot_ref  String?   
+  prd_stat     String?   
+  disc_pct     Int?   
+  max_pur_qty  Int?   
+  created_at   DateTime  @default(now()) 
+
+  @@map("products")
+}
+
+model Ec_Cart_Items_Mod {
+  cart_id      Int
+  cart_id_serl Int
+  prd_cd       Int
+  prd_img_lnk  String
+  prd_desc     String
+  prd_qty      Int
+  prd_rsp      Decimal  
+  tot_amt      Decimal
+  tax_amt      Decimal
+  inp_dt       DateTime  @default(now()) @db.Timestamptz
+
+  @@id([cart_id, cart_id_serl])
+  @@map("ec_cart_items")
+}
+
+model Ec_Carts_Mod {
+  cart_id    Int   
+  cust_mbl   String
+  cust_email String?   
+  cust_fname String
+  cust_lname String
+  cust_addr_1 String
+  cust_addr_2 String
+  cust_city   String
+  cust_ctry   String
+  cust_comp   String?
+  tot_tax     Decimal   
+  tot_itms    Int
+  dlvy_chgs   Decimal   
+  tot_amt     Decimal   
+  cart_stat   String
+  inp_dt     DateTime  @default(now()) @db.Timestamptz
+  inp_by      String
+
+  @@id([cust_mbl, cart_id])
+  @@map("ec_carts")
+}
+
+model Sales_Batch_Mod {
+  sal_id    BigInt @id
+  sal_dt    DateTime
+  sal_amt   Decimal
+  sal_items BigInt
+  sal_qty   BigInt
+  sal_disc  BigInt
+  inp_by    String
+  inp_dt    DateTime  @default(now()) @db.Timestamptz
+  @@map("sales_batch")
+}
+
+model Sales_Tran_Mod {
+  sal_id      Int   
+  itm_cd      BigInt   
+  itm_desc    String
+  itm_qty     Decimal   
+  itm_rsp     Decimal   
+  itm_tax     Decimal   
+  itm_amt     Decimal   
+  itm_stat    String
+  itm_cost    Decimal?  
+  itm_disc    Decimal 
+  @@id([sal_id, itm_cd]) // composite primary key
+  @@map("sales_tran")         // maps to the existing PostgreSQL table
+}
+//	FROM public.fin_tran;
+
+model Fin_Tran_Mod {
+  trn_id      BigInt
+  trn_serl    BigInt
+  trn_date    DateTime
+  mod_id      String
+  ac_no       BigInt
+  gl_cd       BigInt
+  trn_desc    String
+  dr_cr       String  
+  trn_amt     Decimal
+  trn_flag    String
+  trn_stat    String
+  inp_by      String
+  inp_dt      DateTime  @default(now()) @db.Timestamptz
+  @@id([trn_id, trn_serl])
+  @@map("fin_tran")
+}
+
+// Prisma Schema for gen_ledg table
+// File: prisma/schema.prisma
+
+model gen_Ledg_Mod {
+  gl_cd      Int      @id
+  gl_desc    String   @db.Text
+  gl_sdesc   String?  @db.Text
+  gl_cat     String   @db.Text
+  gl_type    String   @db.VarChar
+  yy_op_bal  Decimal  @db.Decimal
+  curr_bal   Decimal  @db.Decimal
+  gl_stat    String   @db.Text
+  inp_by     String   @db.Text
+  inp_dt     DateTime @default(now()) @db.Timestamp(6)
+
+  @@map("gen_ledg")
+}
+
+model accts_Mod {
+  ac_no      Decimal   @id  // PK
+  ac_gl      Decimal
+  ac_title   String
+  ac_contact String
+  ac_addr    String
+  curr_bal   Decimal
+  yy_op_bal  Decimal
+  ac_stat    String
+  inp_by     String
+  inp_dt     DateTime  @default(now())
+
+  @@map("accounts") // Maps to the 'accounts' table in PostgreSQL
+}
+

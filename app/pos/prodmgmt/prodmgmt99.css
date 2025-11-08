@@ -1,0 +1,98 @@
+/* Base Styles */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: white; /* Explicitly set background to white */
+  font-family: Arial, sans-serif;
+}
+
+/* --- Header / Title Banner --- */
+.header {
+  background-color: #4CAF50; /* A nice mid-tone green */
+  color: white;
+  padding: 15px 20px;
+  text-align: center;
+  margin-bottom: 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.8em;
+}
+
+/* --- Form Styles --- */
+.formContainer h2 {
+    color: #388E3C; /* Darker green for section title */
+    border-bottom: 2px solid #A5D6A7; /* Light green separator */
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.formGroup {
+  margin-bottom: 15px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #1B5E20; /* Very dark green for labels */
+}
+
+.formGroup input[type="text"],
+.formGroup input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #C8E6C9; /* Light green border */
+  border-radius: 4px;
+  box-sizing: border-box; /* Ensures padding doesn't widen the input */
+}
+
+/* --- Button Bar Layout --- */
+.buttonBar {
+  margin-top: 30px;
+  display: flex;
+  /* Arranges the buttons in a single horizontal line */
+  justify-content: flex-end; /* Pushes the buttons to the right side */
+  gap: 15px; /* Space between buttons */
+}
+
+/* --- Button Styling --- */
+.buttonBar button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.saveButton {
+  background-color: #4CAF50; /* Primary Green */
+  color: white;
+}
+
+.saveButton:hover {
+  background-color: #388E3C; /* Darker green on hover */
+}
+
+.clearButton {
+  background-color: #C8E6C9; /* Lightest green for secondary action */
+  color: #1B5E20;
+}
+
+.clearButton:hover {
+  background-color: #A5D6A7;
+}
+
+.deleteButton {
+  background-color: #F44336; /* Red for destructive action (standard practice) */
+  color: white;
+}
+
+.deleteButton:hover {
+  background-color: #D32F2F;
+}

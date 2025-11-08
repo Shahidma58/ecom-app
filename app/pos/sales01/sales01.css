@@ -1,0 +1,477 @@
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #f5f8fc;
+  padding: 0px 20px 0px 20px;
+}
+/*============================================================*/
+/* Top Banner Styles */
+.top-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* padding: 1rem 2rem; */
+  padding-left: 10px;
+  padding-right: 10px;
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 50%, #1e8449 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: relative;
+  min-height: 70px;
+}
+
+/* Home Link - Left Corner */
+.home-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.home-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Shop Title - Center */
+.shop-title {
+  color: white;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  flex-grow: 1;
+  text-align: center;
+}
+
+/* Digital Clock - Right Corner */
+.digital-clock {
+  color: white;
+  font-family: 'Courier New', monospace;
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  white-space: nowrap;
+  min-width: 220px;
+  text-align: center;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#dateDisplay {
+  font-weight: 700;
+}
+
+#timeDisplay {
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .top-banner {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+  
+  .shop-title {
+    font-size: 1.5rem;
+    order: 1;
+  }
+  
+  .home-link {
+    order: 2;
+    align-self: flex-start;
+  }
+  
+  .digital-clock {
+    order: 3;
+    align-self: flex-end;
+    font-size: 0.875rem;
+    min-width: 200px;
+  }
+}
+
+/*===========================================================*/
+/* .top-banner {
+  margin-right: 10px;
+  width: 100%;
+  height: 50px;
+  background: linear-gradient(90deg, #28a745, #3cb371);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+} */
+
+.form-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px;
+  max-width: 1200px;
+  margin: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+  margin-bottom: 5px;
+}
+
+.form-field {
+  /* padding: 10px 2px; */
+  color: black;
+  /* border: 1px solid #d0d7de; */
+  border: 1px solid black;
+  border-radius: 4px;
+  font-size: 20px;
+  font-weight: 500;
+  color: black;
+  transition: all 0.3s ease;
+}
+
+.form-field:focus {
+  border-color: #0078d7;
+  box-shadow: 0 0 6px rgba(0, 120, 215, 0.3);
+  outline: none;
+}
+
+.button-row {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.btn {
+  padding: 5px 5px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.save-btn {
+  background: #28a745;
+  color: #fff;
+}
+
+.save-btn:hover {
+  background: #218838;
+}
+
+.update-btn {
+  background: #ffc107;
+  color: #333;
+}
+
+.update-btn:hover {
+  background: #e0a800;
+}
+
+.delete-btn {
+  background: #dc3545;
+  color: #fff;
+}
+
+.delete-btn:hover {
+  background: #c82333;
+}
+
+/* .del-btn {
+  height: 20px;
+  background: #dc3545;
+  color: #fff;
+}
+
+.del-btn:hover {
+  background: #c82333;
+}
+ */
+/* Table Styling */
+.data-table {
+  width: 100%;
+  /* height: 300PX; */
+  border-collapse: collapse;
+  margin-bottom: 5px;
+}
+.data-table th,
+.data-table td {
+  border: 1px solid #ddd;
+  padding: 2px;
+  text-align: center;
+}
+.data-table th {
+  background: #007bff;
+  color: #fff;
+  font-weight: bold;
+}
+.data-table tr:nth-child(even) {
+  background: #add1f8;
+  font-size: 20px;
+}
+
+.data-table tr:nth-child(odd) {
+  background: #cee2f8;
+  font-size: 20px;
+  /* font-weight: 600; */
+}
+
+.data-table tr:hover {
+  background: #99a9b9;
+  cursor: pointer;
+}
+
+/* Table Wrapper - Fixed Height with Scroll */
+.table-wrapper {
+  height: 300px;
+  overflow-y: auto;
+  overflow-x: auto;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+/* Data Table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 20px;
+}
+
+/* Table Header */
+/* .data-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #4a90e2;
+  color: white;
+}
+
+.data-table th {
+  padding: 8px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #2c5aa0;
+} */
+
+/* Table Body Rows */
+.data-table tbody tr {
+  font-size: 20px;
+}
+
+.data-table td {
+  padding: 3px 3px;
+  border-bottom: 1px solid #e0e0e0;
+  height: 20px;
+}
+
+/* Alternating Row Colors */
+/* .data-table tbody tr:nth-child(even) {
+  background: #add1f8;
+}
+
+.data-table tbody tr:nth-child(odd) {
+  background: #cee2f8;
+} */
+
+/* Hover Effect */
+/* .data-table tbody tr:hover {
+  background: #90c8ff;
+  cursor: pointer;
+} */
+
+/* Scrollbar Styling (Optional) */
+.table-wrapper::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+/*Responsive */
+
+@media (max-width: 480px) {
+  .digital-clock {
+    font-size: 0.75rem;
+    min-width: 180px;
+    padding: 0.4rem 0.75rem;
+  }
+  
+  .shop-title {
+    font-size: 1.25rem;
+  }
+}
+
+/* ================== Totals Section =============*/
+/* Totals Section */
+/* Totals Section - Compact */
+.totals-section {
+  background: #f8f9fa;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  border: 2px solid #28a745;
+  margin-top: 1rem;
+}
+
+.totals-row {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Inline Form Group - Label and Input Side by Side */
+.form-group-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Field Labels - Left Side */
+.field-label {
+  font-size: 1.0rem;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+  min-width: fit-content;
+}
+
+/* Form Fields - Compact */
+/* .form-field {
+  padding: 0.5rem;
+  color: black;
+  border: 1px solid black;
+  border-radius: 4px;
+  font-size: 1.25rem;
+  font-weight: 500;
+  font-style: italic;
+  transition: all 0.3s ease;
+} */
+
+/* Totals Fields - Larger and Italic */
+.totals-field {
+  width: 130px;
+  height: 36px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-style: italic;
+  background-color: #fffef0;
+  text-align: right;
+  color: #1e293b;
+  border: 1px solid black;
+  border-radius: 4px;
+  padding: 5px;
+}
+
+.totals-field:focus {
+  border-color: #0078d7;
+  box-shadow: 0 0 6px rgba(0, 120, 215, 0.3);
+  outline: none;
+}
+
+/* Save Button - Compact */
+.save-tots {
+  padding: 0.5rem 1.25rem;
+  height: 36px;
+  background: linear-gradient(135deg, #28a745 0%, #20923a 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.0rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+  min-width: 100px;
+  margin-left: 1rem;
+  padding: 10px;
+}
+
+.save-tots:hover {
+  background: linear-gradient(135deg, #20923a 0%, #1e7e34 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+}
+
+.save-tots:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .totals-row {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .totals-field {
+    width: 90px;
+    font-size: 1.125rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .totals-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .form-group-inline {
+    justify-content: space-between;
+  }
+  
+  .totals-field {
+    width: 150px;
+  }
+  
+  .save-btn {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+/*===================================================*/
+@media (max-width: 768px) {
+  .totals-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .totals-field {
+    width: 100%;
+  }
+  
+  .button-group {
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+  
+  .save-btn {
+    width: 100%;
+  }
+}
