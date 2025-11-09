@@ -7,11 +7,11 @@ const prisma = new PrismaClient();
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { ac_no: string } }
+  { params }: { params: Promise<{ ac_no: string }> }
 ) {
   try {
-    const acct_no = parseInt(params.ac_no);
-
+        const { ac_no } = await params;
+    const acct_no = parseInt(ac_no);
     if (isNaN(acct_no)) {
       return NextResponse.json({ error: "Invalid Account No" }, { status: 400 });
     }

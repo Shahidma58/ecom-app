@@ -187,17 +187,16 @@ model Sales_Tran_Mod {
 //	FROM public.fin_tran;
 
 model Fin_Tran_Mod {
-  trn_id      BigInt
-  trn_serl    BigInt
+  trn_id      Int
+  trn_serl    Int
   trn_date    DateTime
-  mod_id      String
   ac_no       BigInt
   gl_cd       BigInt
   trn_desc    String
   dr_cr       String  
   trn_amt     Decimal
   trn_flag    String
-  trn_stat    String
+  ac_curr_bal Decimal
   inp_by      String
   inp_dt      DateTime  @default(now()) @db.Timestamptz
   @@id([trn_id, trn_serl])
@@ -223,8 +222,8 @@ model gen_Ledg_Mod {
 }
 
 model accts_Mod {
-  ac_no      Decimal   @id  // PK
-  ac_gl      Decimal
+  ac_no      Int   @id  // PK
+  ac_gl      Int
   ac_title   String
   ac_contact String
   ac_addr    String

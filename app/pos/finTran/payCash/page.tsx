@@ -6,77 +6,85 @@ import { calc_dayofyear, get_str_date } from "@/lib/udfs";
 export default function CheckoutPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [gl_desc, setGl_desc] = useState<string | null>(null);
+//  const [gl_desc, setGl_desc] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const drAcRef = useRef<HTMLInputElement>(null);
+  const trnDescRef = useRef<HTMLInputElement>(null);
   const wCOH = parseInt(gVars.gCOH);
   const gUser = gVars.gUser;
-  let wTrn_dt = 0;
-  const today = new Date();
-  const wTrn_date = today;
-
+  const to_day = new Date();
+//  let crAcTitle = "", drAcTitle = "";
+  //======================================================
+  const wTrn_Dt = calc_dayofyear();
   //-=====================================================
-  const [form, setForm] = useState({
-    trn_id: 0,
-    trn_serl: 1,
-    trn_date: wTrn_date,
-    mod_id: "FINTR",
+const initForm = {    trn_id: 0,
+    trn_serl: 0,
+    trn_date: to_day,
+    trn_dt: wTrn_Dt,
     ac_no: wCOH,
-    gl_cd: 200011,
+    gl_cd: 0,
     trn_desc: "Test Tran ---",
     dr_cr: "C",
-    trn_amt: 125,
+    trn_amt: 0,
     trn_flag: "A",
-    trn_stat: "A",
     inp_by: gUser,
+    ac_curr_bal: 0,
     drac_no: 0,
+    drac_curr_bal: 0,
+    drgl_cd: 0,
+};
+  const [form, setForm] = useState(initForm);
+//console.log(form);
+  // const [tran2, setTran2] = useState({
+  //   drgl_cd: 0,
+  //   trn_dt: wTrn_Dt,
+  // });
+  // const [genLedgInfo, setGenLedgInfo] = useState({
+  //   gl_desc: "",
+  //   gl_Curr_Bal: 0,
+  // });
+
+  const [glInfo, setGlInfo] = useState({
+    gl_desc: "",
+    gl_Curr_Bal: 0,
   });
 
-  const [tran2, setTran2] = useState({
-    drgl_cd: 200999,
-    dr_cr: "D",
-    trn_dt: 25303, //wTrn_dt
+  const [acctInfo, setAcctInfo] = useState({
+    ac_Title: "",
+    ac_Curr_Bal: 0,
+    ac_gl: 0,
   });
-
-  const [acctInfo, setAcInfo] = useState({
-    drActitle: "",
-    crActitle: "",
-    drAcBal: 0,
-    crAcBal: 0,
-  });
-  /* =====================  MOVE TO Central config ===============*/
-  const inputClassSmall =
-    "w-[200px]  border-black-500 rounded-md px-3 py-2.5 text-sm w-full focus:outline-none focus:ring-1 focus:ring-pink-400 focus:border-pink-400 transition-all bg-gray-200";
-  const inputClassLarge =
-    "border border-black-500 rounded-md px-3 py-2.5 text-sm w-full focus:outline-none focus:ring-1 focus:ring-pink-400 focus:border-pink-400 transition-all bg-gray-200";
   /* --===========================================================================*/
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
   //================================================
-  //================================================
-  const fetchCOH = async (wCOH: number) => {
+  const fetchGenLedg = async (wCOH: number) => {
     if (!wCOH || wCOH === 0) {
       return;
     }
-
+    const gl_cd = wCOH;
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`/api/pos/fin_tran/get_gl/${wCOH}`);
-      const data = await response.json();
+      const response = await fetch(`/api/pos/fin_tran/get_gl/${gl_cd}`);
 
+      const data = await response.json();
+console.log(data.data.gl_desc);
       if (!response.ok) {
         throw new Error(data.error || "Failed to fetch Account");
       }
+//        crAcTitle = data.data.gl_desc;
+//      if (data.success) {
+        setGlInfo({
+          gl_desc: data.data.gl_desc,
+          gl_Curr_Bal: parseFloat(data.data.curr_bal),
+        });
+        form.ac_curr_bal =  parseFloat(data.data.curr_bal);
+        form.drgl_cd = 0;
+//      }
+//console.log(form);
 
-      if (data.success) {
-        setAcInfo((prev) => ({
-          ...prev,
-          crActitle: data.data.gl_desc,
-          crAcBal: data.data.curr_bal,
-        }));
-      }
     } catch (error) {
       console.error("Error fetching Account:", error);
       setError(
@@ -87,16 +95,13 @@ export default function CheckoutPage() {
     }
   };
   // Function to fetch GL account details
-  // Function to fetch GL account details
   const fetchAccount = async (ac_no: number) => {
     if (!ac_no || ac_no === 0) {
       return;
     }
-
     try {
       setLoading(true);
       setError(null);
-
       const response = await fetch(`/api/pos/fin_tran/get_ac/${ac_no}`);
       const data = await response.json();
 
@@ -105,17 +110,13 @@ export default function CheckoutPage() {
       }
 
       if (data.success) {
-        // Set gl_desc in form state
-        // setForm(prev => ({
-        //   ...prev,
-        //   gl_desc: data.data.ac_title,
-        //   curr_bal: data.data.curr_bal
-        // }));
-        setAcInfo((prev) => ({
-          ...prev,
-          drActitle: data.data.ac_title,
-          drAcBal: data.data.curr_bal,
-        }));
+        setAcctInfo ({
+          ac_Title: data.data.ac_title,
+          ac_Curr_Bal : parseFloat(data.data.curr_bal),
+          ac_gl : parseInt(data.ac_gl)  // add temp input to display value
+        });
+        form.drac_curr_bal =  parseFloat(data.data.curr_bal);
+        form.drgl_cd = parseInt(data.data.ac_gl);
       }
     } catch (error) {
       console.error("Error fetching Account:", error);
@@ -123,35 +124,58 @@ export default function CheckoutPage() {
         error instanceof Error ? error.message : "Failed to fetch account"
       );
       // Clear gl_desc on error
-      setForm((prev) => ({
-        ...prev,
-        gl_desc: "",
-      }));
+        setAcctInfo ({
+          ac_Title: "",
+          ac_Curr_Bal : 0,
+          ac_gl : 0  
+        });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGLCodeBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleDrAcBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const gl_cd = parseInt(e.target.value);
 
     if (!isNaN(gl_cd) && gl_cd > 0) {
-      fetchAccount(gl_cd);
+      if (gl_cd > 100000) {
+        fetchAccount(gl_cd);
+      } else {
+        fetchAccount(gl_cd);
+      }
     }
+    trnDescRef.current?.focus();
   };
-  //==================================================
-  const handlePostTran = async () => {
+  //================== POST TRANSACTIONS =========================
+  const handleSaveTran = async () => {
+    let err = "";
+    if (form.ac_no < 100000 && form.gl_cd > 0) {
+      err = "Invalid Cr-GL Code initialized"
+    } 
+    if (form.ac_no > 99999 && form.gl_cd == 0) {
+      err = "Invalid Cr-GL Code initialized"
+    } 
+    if (form.drac_no < 100000 && form.drgl_cd > 0) {
+      err = "Invalid Dr-GL Code initialized"
+    } 
+    if (form.drac_no > 99 && form.drgl_cd == 0) {
+      err = "Invalid Dr-GL Code initialized"
+    } 
+    if (err != "") {
+      alert('Err: Invalid Data being Sent');
+      return;
+    }
     try {
       setLoading(true);
       setError(null);
 
       const tranPayload = {
-        tranDr: tran2,
-        tranInfo: form,
+//        tranDbt: tran2,
+        tranCr: form,
       };
 
-      console.log("creating a cart----------");
-
+      console.log("creating a Transaction----------");
+//console.log(tranPayload);
       const apiResponse = await fetch("/api/pos/fin_tran/save_fin_tr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -170,13 +194,31 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
-  //==================================================
+  //=============   Get COH G/L =================================
+    const handleClearForm = async () => {
+    //  setForm(prevForm => ({
+    //     ...prevForm, 
+    //     dr_cr: "AAAA"
+    //   }));
+    //console.log(form);
+     setForm(initForm);      
+     console.log(form);
+    }
+//=======================================================
   useEffect(() => {
-    fetchCOH(wCOH);
+    fetchGenLedg(wCOH);
+//    crAcTitle = genLedgInfo.gl_desc, 
+//    form.ac_curr_bal,
+    form.gl_cd=0         
     drAcRef.current?.focus();
   }, []);
-
-  return (
+  /* =====================  MOVE TO Central config ===============*/
+  const inputClassSmall =
+    "w-[200px]  border-black-500 rounded-md px-3 py-2.5 text-sm w-full focus:outline-none focus:ring-1 focus:ring-pink-400 focus:border-pink-400 transition-all bg-gray-200";
+  const inputClassLarge =
+    "border border-black-500 rounded-md px-3 py-2.5 text-sm w-full focus:outline-none focus:ring-1 focus:ring-pink-400 focus:border-pink-400 transition-all bg-gray-200";
+  /* =====================  MOVE TO Central config ===============*/
+    return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
         <div
@@ -240,10 +282,10 @@ export default function CheckoutPage() {
                 <input
                   name="crAcTitle"
                   type="text"
-                  value={acctInfo.crActitle}
+                  value={glInfo.gl_desc}
                   placeholder="A/c Title"
                   className={inputClassLarge}
-                  readOnly
+                  disabled
                 />
               </div>
 
@@ -253,8 +295,9 @@ export default function CheckoutPage() {
                   id="crAcBal"
                   name="crAcBal"
                   type="text"
-                  value={acctInfo.crAcBal}
+                  value={form.ac_curr_bal}
                   className={inputClassSmall + " text-right bg-gray-100"}
+                  onChange={handleInputChange}
                   readOnly
                 />
               </div>
@@ -275,15 +318,15 @@ export default function CheckoutPage() {
                     title="Pay to Account/GL"
                     className={inputClassSmall}
                     onChange={handleInputChange}
-                    onBlur={handleGLCodeBlur}
+                    onBlur={handleDrAcBlur}
                   />
                 </div>
                 <div className="md:col-span-2">
                   <input
                     name="drAcTitle"
                     type="text"
-                    value={acctInfo.drActitle}
-                    placeholder="Credit Account"
+                    value={acctInfo.ac_Title}
+                    placeholder="Pay to Account"
                     className={inputClassLarge}
                     maxLength={35}
                     //onChange={handleInputChange}
@@ -294,11 +337,11 @@ export default function CheckoutPage() {
                   <input
                     name="drAcrBal"
                     type="text"
-                    value={acctInfo.drAcBal}
+                    value={form.drac_curr_bal}
                     placeholder="Balance"
                     className={inputClassSmall + " text-right bg-gray-100"}
-                    //onChange={handleInputChange}
-                    disabled
+                    onChange={handleInputChange}
+                    readOnly
                   />
                 </div>
               </div>
@@ -307,6 +350,7 @@ export default function CheckoutPage() {
                 <input
                   name="trn_desc"
                   type="text"
+                  ref={trnDescRef}
                   value={form.trn_desc}
                   required
                   placeholder="Description"
@@ -331,13 +375,38 @@ export default function CheckoutPage() {
                   onChange={handleInputChange}
                 />
               </div>
+              {/* ================  TEMP ============= */}
+              <div className="w-20 md:col-span-1">
+                <input
+                  name="cr_ac_gl"
+                  type="text"
+                  value={form.gl_cd}
+                  placeholder="cr GL"
+                  className={inputClassSmall}
+                  onChange={handleInputChange}
+                  disabled
+                />
+              </div>
+
+              <div className="w-20 md:col-span-1">
+                <input
+                  name="dr_ac_gl"
+                  type="text"
+                  value={form.drgl_cd}
+                  placeholder="Debit GL"
+                   className={inputClassSmall}
+                  onChange={handleInputChange}
+                  disabled
+                />
+              </div>
+
             </div>
           </div>
 
           {/* ============================= Buttons ================= */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
             <button
-              onClick={handlePostTran}
+              onClick={handleSaveTran}
               disabled={loading}
               className={`btn-primary ${loading ? "btn-loading" : ""}`}
             >
@@ -380,9 +449,7 @@ export default function CheckoutPage() {
             </button>
 
             <button
-              onClick={
-                () => {}
-              }
+              onClick={ handleClearForm }
               disabled={loading}
               className={`border-2 border-pink-300 text-pink-600 py-2.5 px-6 rounded-md font-semibold hover:border-pink-400 hover:bg-pink-50 transition-colors ${
                 loading ? "opacity-50 cursor-not-allowed" : ""
@@ -396,7 +463,6 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
 
 //Clr_Form {
                   // setForm({
@@ -413,3 +479,21 @@ export default function CheckoutPage() {
                 //   trn_stat: "A",
                 //   inp_by: "Admin",
 //}
+
+
+  // const [form, setForm] = useState({
+  //   trn_id: 0,
+  //   trn_serl: 0,
+  //   trn_date: wTrn_Dt,
+  //   ac_no: wCOH,
+  //   gl_cd: 0,
+  //   trn_desc: "Test Tran ---",
+  //   dr_cr: "C",
+  //   trn_amt: 0,
+  //   trn_flag: "A",
+  //   inp_by: gUser,
+  //   ac_curr_bal: 0,
+  //   drac_no: 0,
+  //   drAc_Curr_Bal: 0,
+  //   drgl_cd: 999,
+  // });
