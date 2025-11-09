@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma"; 
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   try {
@@ -8,16 +8,22 @@ export async function GET(req: NextRequest) {
     const prd_cd = searchParams.get("prd_cd");
 
     if (!prd_cd) {
-      return NextResponse.json({ error: "prd_cd parameter is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "prd_cd parameter is required" },
+        { status: 400 }
+      );
     }
 
-    const prdCode = parseInt(prd_cd);
-    if (isNaN(prdCode)) {
-      return NextResponse.json({ error: "prd_cd must be a valid number" }, { status: 400 });
+    const prdCode = prd_cd;
+    if (prdCode === undefined) {
+      return NextResponse.json(
+        { error: "prd_cd must be a valid number" },
+        { status: 400 }
+      );
     }
 
     // Prisma query
-    const product = await prisma.Prods_Mod.findFirst({
+    const product = await prisma.prods_Mod.findFirst({
       where: {
         prd_cd: prdCode,
         prd_qoh: { gt: 0 },
@@ -32,7 +38,10 @@ export async function GET(req: NextRequest) {
     });
 
     if (!product) {
-      return NextResponse.json({ error: "Product not found or inactive" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Product not found or inactive" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ success: true, data: product });

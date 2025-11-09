@@ -92,32 +92,33 @@ model SubPosts_Mod {
 // }
 
 model Prods_Mod {
-  prd_cd       Int       @id
-  bar_cd       String    
-  prd_desc     String    
-  inp_by       String    
-  prd_sku      String    
-  prd_qoh      Float     
-  prd_re_ord   Float     
-  prd_img_lnk  String?   
-  prd_cat      String    
-  prd_brand    String?   
-  max_rsp      Float?    
-  min_rsp      Float?    
-  tax_amt      Float?    
-  pur_prc      Float?    
-  disc_amt     Float?    
-  disc_st_dt   Float?    
-  disc_end_dt  Float?    
-  exp_dt       DateTime? 
-  prd_lot_ref  String?   
-  prd_stat     String?   
-  disc_pct     Int?   
-  max_pur_qty  Int?   
-  created_at   DateTime  @default(now()) 
+  prd_cd String @id
+  bar_cd       String
+  prd_desc     String
+  inp_by       String
+  prd_sku      String
+  prd_qoh      Float
+  prd_re_ord   Float
+  prd_img_lnk  String?
+  prd_cat      String
+  prd_brand    String?
+  max_rsp      Float?
+  min_rsp      Float?
+  tax_amt      Float?
+  pur_prc      Float?
+  disc_amt     Float?
+  disc_st_dt   DateTime?
+  disc_end_dt  DateTime?
+  exp_dt       DateTime?
+  prd_lot_ref  String?
+  prd_stat     String?
+  disc_pct     Int?
+  max_pur_qty  Int?
+  created_at   DateTime   @default(now())
 
   @@map("products")
 }
+
 
 model Ec_Cart_Items_Mod {
   cart_id      Int
