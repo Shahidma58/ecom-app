@@ -8,25 +8,25 @@ const prisma = new PrismaClient();
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { gl_cd: string } }
+  context: { params: Promise<{ gl_cd: string }> }
 ) {
   try {
-    const glCode = parseInt(params.gl_cd);
+    const { gl_cd } = await context.params; 
+    const glCode = parseInt(gl_cd);
 
     if (isNaN(glCode)) {
       return NextResponse.json({ error: "Invalid gl_cd" }, { status: 400 });
     }
-
     const glAccount = await prisma.gen_Ledg_Mod.findFirst({
       where: {
         gl_cd: glCode,
-        gl_stat: "Active",
-        gl_type: "GL",
+//        gl_stat: "Active",
+//        gl_type: "GL",
       },
-      select: {
-        gl_desc: true,
-        curr_bal: true,
-      },
+      // select: {
+      //   gl_desc: true,
+      //   curr_bal: true,
+      // },
     });
 
     if (!glAccount) {

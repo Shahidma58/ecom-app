@@ -6,20 +6,23 @@ import { calc_dayofyear, get_str_date } from "@/lib/udfs";
 export default function CheckoutPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-//  const [gl_desc, setGl_desc] = useState<string | null>(null);
+  //  const [gl_desc, setGl_desc] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const drAcRef = useRef<HTMLInputElement>(null);
+  const crAcRef = useRef<HTMLInputElement>(null);
   const trnDescRef = useRef<HTMLInputElement>(null);
+  const trnAmtRef = useRef<HTMLInputElement>(null);
+
   const wCOH = parseInt(gVars.gCOH);
   const gUser = gVars.gUser;
   const to_day = new Date();
   let wFlag = "C";
-  const [drAcDesc, setDrAcDesc ] = useState("");
-  const [crAcDesc, setCrAcDesc ] = useState("");
+  const [drAcDesc, setDrAcDesc] = useState("");
+  const [crAcDesc, setCrAcDesc] = useState("");
   //======================================================
   const wTrn_Dt = calc_dayofyear();
   //-=====================================================
-  const initForm = {    trn_id: 0,
+  const initForm = {
+    trn_id: 0,
     trn_serl: 0,
     trn_date: to_day,
     trn_dt: wTrn_Dt,
@@ -51,19 +54,20 @@ export default function CheckoutPage() {
       setError(null);
       const response = await fetch(`/api/pos/fin_tran/get_gl/${gl_cd}`);
       const data = await response.json();
-console.log(data.data.curr_bal);
+      console.log(data.data.curr_bal);
       if (!response.ok) {
         throw new Error(data.error || "Failed to fetch Account");
       }
 
-      setForm(prevForm => ({
-        ...prevForm, ac_curr_bal : data.data.curr_bal,
+      setForm((prevForm) => ({
+        ...prevForm,
+        drac_curr_bal: data.data.curr_bal,
       }));
-      if (wFlag == "C") {
-        setCrAcDesc(data.data.gl_desc)
-      } else {
-        setDrAcDesc(data.data.gl_desc)
-      }
+    //   if (wFlag == "C") {
+    //     setCrAcDesc(data.data.gl_desc);
+    //   } else {
+        setDrAcDesc(data.data.gl_desc);
+//      }
       form.drgl_cd = 0;
     } catch (error) {
       console.error("Error fetching Account:", error);
@@ -95,9 +99,14 @@ console.log(data.data.curr_bal);
         //   ac_Curr_Bal : parseFloat(data.data.curr_bal),
         //   ac_gl : parseInt(data.ac_gl)  // add temp input to display value
         // });
-        setDrAcDesc(data.data.ac_title);
-        form.drac_curr_bal =  parseFloat(data.data.curr_bal);
-        form.drgl_cd = parseInt(data.data.ac_gl);
+        setCrAcDesc(data.data.ac_title);
+//        if (wFlag == 'C') {
+          form.ac_curr_bal = parseFloat(data.data.curr_bal);
+          form.gl_cd = parseInt(data.data.ac_gl);
+        // } else {
+        //   form.ac_curr_bal = parseFloat(data.data.curr_bal);
+        //   form.gl_cd = parseInt(data.data.ac_gl);
+        // }
       }
     } catch (error) {
       console.error("Error fetching Account:", error);
@@ -109,16 +118,16 @@ console.log(data.data.curr_bal);
     }
   };
 
-  const handleDrAcBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleCrAcBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const gl_cd = parseInt(e.target.value);
-    wFlag = "D";
+    wFlag = "C";
     if (!isNaN(gl_cd) && gl_cd > 0) {
       if (gl_cd > 100000) {
         fetchAccount(gl_cd);
-//        setDrAcDesc(acctInfo.ac_Title)
+        //        setDrAcDesc(acctInfo.ac_Title)
       } else {
         fetchGenLedg(gl_cd);
-//        setDrAcDesc(glInfo.gl_desc)
+        //        setDrAcDesc(glInfo.gl_desc)
       }
     }
     trnDescRef.current?.focus();
@@ -126,33 +135,41 @@ console.log(data.data.curr_bal);
   //================== POST TRANSACTIONS =========================
   const handleSaveTran = async () => {
     let err = "";
-    if (form.ac_no < 100000 && form.gl_cd > 0) {
-      err = "Invalid Cr-GL Code initialized"
-    } 
-    if (form.ac_no > 99999 && form.gl_cd == 0) {
-      err = "Invalid Cr-GL Code initialized"
-    } 
-    if (form.drac_no < 100000 && form.drgl_cd > 0) {
-      err = "Invalid Dr-GL Code initialized"
-    } 
-    if (form.drac_no > 99 && form.drgl_cd == 0) {
-      err = "Invalid Dr-GL Code initialized"
-    } 
+    if (form.ac_no > 99999) {
+      if (form.gl_cd <= 0) {
+        err = "Invalid Cr-GL Code initialized";
+      }
+    } else {
+      if (form.gl_cd != 0) {
+        err = "Invalid Cr-GL Code initialized";
+      }
+    }
+    if (form.drac_no > 99999) {
+      if (form.drgl_cd <= 0) {
+        err = "Invalid Cr-GL Code initialized";
+      }
+    } else {
+      if (form.drgl_cd != 0) {
+        err = "Invalid Cr-GL Code initialized";
+      }
+    }
+    if (form.trn_amt < 1) {
+        err = "Err: Invalid Amount";
+    }
     if (err != "") {
-      alert('Err: Invalid Data being Sent');
+      alert("Err: Invalid Data being Sent");
       return;
     }
     try {
       setLoading(true);
       setError(null);
-
       const tranPayload = {
-//        tranDbt: tran2,
+        //        tranDbt: tran2,
         tranCr: form,
       };
 
       console.log("creating a Transaction----------");
-//console.log(tranPayload);
+      //console.log(tranPayload);
       const apiResponse = await fetch("/api/pos/fin_tran/save_fin_tr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -172,22 +189,23 @@ console.log(data.data.curr_bal);
     }
   };
   //=============   Get COH G/L =================================
-    const handleClearForm = async () => {
-      setDrAcDesc("");
-      setCrAcDesc("");  
-      setForm(initForm);      
-      console.log(form);
-    }
-//=======================================================
-  useEffect (() => {
+  const handleClearForm = async () => {
+    setDrAcDesc("");
+    setCrAcDesc("");
+    setForm(initForm);
+    console.log(form);
+  };
+  //=======================================================
+  useEffect(() => {
     fetchGenLedg(wCOH);
-    wFlag = 'C';  
-    setForm(prevForm => ({
-      ...prevForm, ac_no: wCOH
+    wFlag = "C";
+    setForm((prevForm) => ({
+      ...prevForm,
+      drac_no: wCOH,
     }));
-//    setCrAcDesc(crAcTitle);
-    form.gl_cd=0         
-    drAcRef.current?.focus();
+//    setDrAcDesc(crAcTitle);
+    form.drgl_cd = 0;
+    crAcRef.current?.focus();
   }, []);
   /* =====================  MOVE TO Central config ===============*/
   const inputClassSmall =
@@ -195,17 +213,18 @@ console.log(data.data.curr_bal);
   const inputClassLarge =
     "border border-black-500 rounded-md px-3 py-2.5 text-sm w-full focus:outline-none focus:ring-1 focus:ring-pink-400 focus:border-pink-400 transition-all bg-gray-200";
   /* =====================  MOVE TO Central config ===============*/
-    return (
+  return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
         <div
           className="mb-4 rounded-lg shadow-lg p-2 text-center"
           style={{
-            background: "linear-gradient(to right, #086D23FF, #347E0CFF, #056C20FF)",
+            background:
+              "linear-gradient(to right, #3B7B23FF, #72C049FF, #8180D4FF)",
           }}
         >
           <h2 className="text-2xl font-semibold text-white mb-2">
-            Pay Cash --- {gVars.siteName}
+            Receive Cash
           </h2>
           {/* <div className="h-1 w-20 bg-white rounded-full mx-auto"></div> */}
         </div>
@@ -229,103 +248,102 @@ console.log(data.data.curr_bal);
               </div>
             </div>
           )}
-          {/* //===================== FROM ACCOUNT =========================== */}
+          {/* =================  TO ACCOUNT ======================= */}
           <div className="space-y-1">
-            {/* Header Row */}
+            {/*=================== Header Row =======================*/}
             <div className="grid grid-cols-4 gap-2 text-sm font-medium text-gray-700">
               <div>Account</div>
               <div className="col-span-2">Title</div>
               <div>Curr Bal.</div>
             </div>
-
-            {/* Input Row */}
-            <div className="grid grid-cols-4 gap-2 items-center">
-              {/* Account Input */}
-
-              {/* <div className="w-full">  */}
-                <div className="flex gap-1 w-[150px] border-black-800 items-center">
-                <span className="w-30 ">From:</span>
+          {/* ==================== Cash on Hand GL=========== */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+              {/* <div className="md:col-span-1"> */}
+              <div className="flex gap-1 w-[150px] border-black-800 items-center">
+                <span className="w-30">To:</span>
                 <input
-                  name="ac_no"
+                  name="drac_no"
                   type="text"
-                  placeholder="Pay Cash"
-                  title="Cash on Hand G/L"
+                  value={form.drac_no}
+                  placeholder="Pay To"
                   maxLength={6}
+                  title="Cash on Hand G/L"
                   className={inputClassSmall}
-                  value={form.ac_no}
                   onChange={handleInputChange}
                 />
               </div>
-
-              {/* Title Input */}
-              <div className="col-span-2 w-full">
+              <div className="md:col-span-2">
                 <input
-                  name="crAcTitle"
+                  name="drAcTitle"
                   type="text"
-                  value={crAcDesc}
-                  placeholder="Cash G/L"
+                  value={drAcDesc}
+                  placeholder="Receive into Account"
                   className={inputClassLarge}
+                  maxLength={35}
+                  //onChange={handleInputChange}
                   disabled
                 />
               </div>
-
-              {/* Current Balance Input */}
-              <div className="w-full">
+              <div className="md:col-span-1">
                 <input
-                  id="crAcBal"
-                  name="crAcBal"
+                  name="drAcBal"
                   type="text"
-                  value={form.ac_curr_bal}
+                  value={form.drac_curr_bal}
+                  placeholder="Balance"
                   className={inputClassSmall + " text-right bg-gray-100"}
                   onChange={handleInputChange}
                   readOnly
                 />
               </div>
             </div>
-
-            {/* =================  TO ACCOUNT ======================= */}
+            {/* //===============Credit - RCV CASH From ========= */}
             <div className="space-y-1">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                {/* <div className="md:col-span-1"> */}
+              {/* Input Row */}
+              <div className="grid grid-cols-4 gap-2 items-center">
+                {/* Account Input */}
+
+                {/* <div className="w-full">  */}
                 <div className="flex gap-1 w-[150px] border-black-800 items-center">
-                  <span className="w-30">To:</span>
+                  <span className="w-30 ">From:</span>
                   <input
-                    name="drac_no"
+                    name="ac_no"
                     type="text"
-                    ref={drAcRef}
-                    value={form.drac_no}
-                    placeholder="Pay To"
+                    ref={crAcRef}
+                    placeholder="Pay From"
+                    title="Pay from this A/c"
                     maxLength={6}
-                    title="Pay to Account/GL"
                     className={inputClassSmall}
+                    value={form.ac_no}
                     onChange={handleInputChange}
-                    onBlur={handleDrAcBlur}
+                    onBlur={handleCrAcBlur}
                   />
                 </div>
-                <div className="md:col-span-2">
+                {/* Title Input */}
+                <div className="col-span-2 w-full">
                   <input
-                    name="drAcTitle"
+                    name="crAcTitle"
                     type="text"
-                    value={drAcDesc}
-                    placeholder="Pay to Account"
+                    value={crAcDesc}
+                    placeholder="Paying Account"
                     className={inputClassLarge}
-                    maxLength={35}
-                    //onChange={handleInputChange}
                     disabled
                   />
                 </div>
-                <div className="md:col-span-1">
+
+                {/* Current Balance Input */}
+                <div className="w-full">
                   <input
-                    name="drAcrBal"
+                    id="crAcBal"
+                    name="crAcBal"
                     type="text"
-                    value={form.drac_curr_bal}
-                    placeholder="Balance"
+                    value={form.ac_curr_bal}
                     className={inputClassSmall + " text-right bg-gray-100"}
                     onChange={handleInputChange}
                     readOnly
                   />
                 </div>
               </div>
+
               <div className="flex">
                 <label className="w-52 pt-2">Description: </label>
                 <input
@@ -348,9 +366,10 @@ console.log(data.data.curr_bal);
               <div className="w-40 md:col-span-1">
                 <input
                   name="trn_amt"
-                  type="text"
+                  type="number"
                   value={form.trn_amt}
                   placeholder="Amount"
+                  min={1}
                   required
                   className={inputClassSmall}
                   onChange={handleInputChange}
@@ -375,12 +394,11 @@ console.log(data.data.curr_bal);
                   type="text"
                   value={form.drgl_cd}
                   placeholder="Debit GL"
-                   className={inputClassSmall}
+                  className={inputClassSmall}
                   onChange={handleInputChange}
                   disabled
                 />
               </div>
-
             </div>
           </div>
 
@@ -430,7 +448,7 @@ console.log(data.data.curr_bal);
             </button>
 
             <button
-              onClick={ handleClearForm }
+              onClick={handleClearForm}
               disabled={loading}
               className={`border-2 border-pink-300 text-pink-600 py-2.5 px-6 rounded-md font-semibold hover:border-pink-400 hover:bg-pink-50 transition-colors ${
                 loading ? "opacity-50 cursor-not-allowed" : ""

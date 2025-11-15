@@ -83,14 +83,14 @@ export default function ProductsManagement() {
                   Help
                 </button>
               </div> */}
-<div className="flex flex-wrap items-center gap-4">
+<div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
   <label
     htmlFor="prd_brand"
     className="text-sm font-medium text-gray-700 text-left"
   >
     Brand
   </label>
-
+<div className='flex gap-4'>
   <input
     type="text"
     id="prd_brand"
@@ -104,6 +104,7 @@ export default function ProductsManagement() {
   >
     Help
   </button>
+  </div>
 </div>
 
 
