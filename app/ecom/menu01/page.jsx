@@ -11,23 +11,23 @@ const GREEN_BUTTON_STYLE =
 
 // Define the names and explicit paths for the 12 mock pages as an array of objects.
 const PAGE_DATA = [
-  { name: "Dashboard", path: "/ecom/finTran/payCash" },
-  { name: "Analytics", path: "/analytics" },
-  { name: "Reports", path: "/reports" },
-  { name: "Settings", path: "/settings" },
-  { name: "Users", path: "/users" },
-  { name: "Products", path: "/products" },
-  { name: "Invoices", path: "/invoices" },
-  { name: "Support", path: "/support" },
-  { name: "Projects", path: "/projects" },
-  { name: "Calendar", path: "/calendar" },
-  { name: "Tasks", path: "/tasks" },
-  { name: "Finance", path: "/finance" }
-];
+  { name: "Dashboard", path: "/pos/dashboard" },
+  { name: "Update Product Info.", path: "/pos/prods/upd_info" },
+  { name: "Update Prices", path: "/pos/prods/upd_prices" },
+  { name: "Account Statement", path: "/pos/accts/stmt" },
+  { name: "General Ledgers", path: "/pos/gen_ledg/gl_enq" },
+  { name: "Customer Accounts", path: "/pos/accts/acct_enq" },
+  { name: "Update Products Prices", path: "/pos/prods/upd_prices" },
+  { name: "Update Account Info", path: "/pos/accts/acctmgmt" },
+  { name: "aaaaaaaaa", path: "/calendar" },
+  { name: "Pay Cash", path: "/pos/finTran/payCash" },
+  { name: "Recieve Cash", path: "/pos/finTran/rcvCash" },
+  { name: "Counter Sales", path: "/pos/sales01" }
+ ];
 
 const App = () => {
   const router = useRouter();
-  const [navigationStatus, setNavigationStatus] = useState("Ready to navigate!");
+  const [navigationStatus, setNavigationStatus] = useState("Point of Sale");
 
   // Function to handle the navigation event using the explicit path
   const handleNavigation = (name, path) => {
@@ -41,7 +41,7 @@ const App = () => {
     <div className="min-h-screen bg-gray-50 font-sans antialiased flex flex-col items-center p-4 sm:p-8">
       
       {/* Top Banner Section */}
-      <header className="w-full max-w-4xl mb-12 bg-emerald-50 border-b-4 border-emerald-600 rounded-xl shadow-lg p-6">
+      {/* <header className="w-full max-w-4xl mb-12 bg-emerald-50 border-b-4 border-emerald-600 rounded-xl shadow-lg p-6">
         <div className="flex items-center space-x-3 text-emerald-800">
           <PanelTop className="w-8 h-8" />
           <h1 className="text-3xl font-bold tracking-tight">Green Shade Command Center</h1>
@@ -49,7 +49,7 @@ const App = () => {
         <p className="mt-2 text-emerald-600">
           Select a module below to begin. All buttons share the same single Tailwind class for consistent styling.
         </p>
-      </header>
+      </header> */}
 
       {/* Navigation Status Message */}
       <div className="w-full max-w-4xl text-center mb-8 p-3 bg-emerald-100 text-emerald-800 font-medium rounded-lg">
