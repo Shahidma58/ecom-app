@@ -92,21 +92,19 @@ model SubPosts_Mod {
 // }
 
 model Prods_Mod {
-  prd_cd String @id
-  bar_cd       String
+  prd_cd    Int @id
   prd_desc     String
-  inp_by       String
   prd_sku      String
-  prd_qoh      Float
-  prd_re_ord   Float
+  prd_qoh      Int
+  prd_re_ord   Int
   prd_img_lnk  String?
   prd_cat      String
   prd_brand    String?
-  max_rsp      Float?
-  min_rsp      Float?
-  tax_amt      Float?
-  pur_prc      Float?
-  disc_amt     Float?
+  max_rsp      Decimal?
+  min_rsp      Decimal?
+  tax_amt      Decimal?
+  pur_prc      Decimal?
+  disc_amt     Decimal?
   disc_st_dt   DateTime?
   disc_end_dt  DateTime?
   exp_dt       DateTime?
@@ -114,6 +112,7 @@ model Prods_Mod {
   prd_stat     String?
   disc_pct     Int?
   max_pur_qty  Int?
+  inp_by       String
   created_at   DateTime   @default(now())
 
   @@map("products")
@@ -191,8 +190,8 @@ model Fin_Tran_Mod {
   trn_id      Int
   trn_serl    Int
   trn_date    DateTime
-  ac_no       BigInt
-  gl_cd       BigInt
+  ac_no       Int
+  gl_cd       Int
   trn_desc    String
   dr_cr       String  
   trn_amt     Decimal
@@ -209,17 +208,20 @@ model Fin_Tran_Mod {
 
 model gen_Ledg_Mod {
   gl_cd      Int      @id
-  gl_desc    String   @db.Text
-  gl_sdesc   String?  @db.Text
-  gl_cat     String   @db.Text
-  gl_type    String   @db.VarChar
-  yy_op_bal  Decimal  @db.Decimal
-  curr_bal   Decimal  @db.Decimal
-  gl_stat    String   @db.Text
-  inp_by     String   @db.Text
+  gl_desc    String   
+  gl_sdesc   String?  
+  gl_cat     String   
+  gl_type    String   
+  yy_op_bal  Decimal  
+  curr_bal   Decimal  
+  gl_stat    String   
+  inp_by     String   
   inp_dt     DateTime @default(now()) @db.Timestamp(6)
 
   @@map("gen_ledg")
+
+  // ✅ Define the back relation
+  accts      accts_Mod[]
 }
 
 model accts_Mod {
@@ -234,6 +236,24 @@ model accts_Mod {
   inp_by     String
   inp_dt     DateTime  @default(now())
 
-  @@map("accounts") // Maps to the 'accounts' table in PostgreSQL
+  @@map("accounts") 
+  // ✅ Define relation to gen_ledg_Mod
+  gen_ledg   gen_Ledg_Mod? @relation(fields: [ac_gl], references: [gl_cd])
 }
 
+model brands_Mod {
+  brand_name String   @id @db.VarChar(25)
+  logo_lnk   String? @db.VarChar(64)
+  manuf_by   String? @db.VarChar(35)
+  inp_by     String @db.VarChar(15)
+  inp_dt     DateTime  @default(now())
+  @@map("brands")
+}
+
+model prod_categ_Mod {
+  cat_cd     String   @id @db.VarChar(15)
+  cat_desc   String?  @db.VarChar(30)
+  inp_by     String   @db.VarChar(15)
+  inp_dt     DateTime @default(now())
+  @@map("prod_categ")
+}

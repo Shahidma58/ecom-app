@@ -1,41 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+//import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
-
-export async function GET(req: NextRequest) {
-try {
-    const { searchParams } = new URL(req.url);
-    const ac_no = searchParams.get("ac_no");
-
-    if (!ac_no) {
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ ac_no: string }> }
+) {
+  try {
+    const { ac_no } = await context.params; 
+    const wac_no = parseInt(ac_no);
+    // Validate
+    if (!wac_no) {
       return NextResponse.json(
-        { success: false, message: "ac_no query parameter is required" },
+        { error: "ac_no parameter is required" },
         { status: 400 }
       );
     }
 
-//  const ac_no = parseInt(params.ac_no);
-
 //    const accountNo = wac_no;
-    // if (isNaN(ac_no)) {
-    //   return NextResponse.json(
-    //     { error: "ac_no must be a valid number" },
-    //     { status: 400 }
-    //   );
-    // }
+    if (isNaN(wac_no)) {
+      return NextResponse.json(
+        { error: "ac_no must be a valid number" },
+        { status: 400 }
+      );
+    }
 
     // Prisma query
     const account = await prisma.accts_Mod.findFirst({
       where: {
-        ac_no: ac_no,
-        ac_stat: "Active",
+        ac_no: wac_no,
+//        ac_stat: "Active",
       },
-      select: {
-        ac_title: true,
-        ac_gl: true,
-        curr_bal: true,
+      //select: { *
+        // ac_title: true,
+        // ac_gl: true,
+        // curr_bal: true,
+      //},
+      include: {
+        gen_ledg: {
+          select: { gl_desc: true },
+        }
       },
+
     });
 
     if (!account) {

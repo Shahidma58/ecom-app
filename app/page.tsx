@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 export default function HomeRedirect() {
   // Redirects the root path (/) to the desired e-commerce products page.
   // The destination path should be the external URL path, which is /products.
-  redirect('/ecom/products');
+  redirect('/menu01');
 }
 // export default function Home() {
 //   return (
