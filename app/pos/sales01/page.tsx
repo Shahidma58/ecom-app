@@ -19,6 +19,7 @@ export default function Sales01() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [salItems, setSalItems] = useState<FormItem[]>([]);
+  const [returnMode, setReturnMode] = useState(false);
   const [salTotals, setSalTotals] = useState<SalTotal>({
     sal_id: 0,
     sal_dt: today,
@@ -134,10 +135,14 @@ export default function Sales01() {
         (sum, item) => sum + Number(item.itm_qty),
         0
       );
-      const totalAmount = updatedItems.reduce(
+      let totalAmount = updatedItems.reduce(
         (sum, item) => sum + Number(item.itm_amt),
         0
       );
+
+      if (returnMode) {
+        totalAmount = totalAmount * -1;
+      }
       const totalDisc = updatedItems.reduce(
         (sum, item) => sum + Number(item.itm_disc),
         0
@@ -294,6 +299,7 @@ export default function Sales01() {
                 value={form.itm_cd || ""}
                 onChange={handleInputChange}
                 onBlur={() => fetchProd(Number(form.itm_cd))}
+                onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
               />
             </div>
             <div className="sales-form-col-4">
@@ -303,6 +309,7 @@ export default function Sales01() {
                 className="sales-input sales-input-readonly"
                 value={form.itm_desc}
                 readOnly
+                onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
               />
             </div>
             <div className="sales-form-col-1">
@@ -313,6 +320,7 @@ export default function Sales01() {
                 className="sales-input"
                 value={form.itm_qty}
                 onChange={handleInputChange}
+                onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
               />
             </div>
             <div className="sales-form-col-1">
@@ -323,6 +331,7 @@ export default function Sales01() {
                 className="sales-input"
                 value={form.itm_rsp}
                 onChange={handleInputChange}
+                onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
               />
             </div>
             <div className="sales-form-col-1">
@@ -333,6 +342,7 @@ export default function Sales01() {
                 className="sales-input"
                 value={form.itm_disc}
                 onChange={handleInputChange}
+                onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
               />
             </div>
             <div className="sales-form-col-2">
@@ -346,10 +356,18 @@ export default function Sales01() {
               />
             </div>
             <div className="sales-form-col-1">
-              <button className="sales-btn-add" onClick={handleAddItem}>
-                ➕ Add
+              <button
+                className={`sales-btn-return ${returnMode ? "active" : ""}`}
+                onClick={() => setReturnMode(!returnMode)}
+                type="button">
+                Return
               </button>
             </div>
+            {/* <div className="sales-form-col-1">
+              <button className="sales-btn-add" onClick={handleAddItem}>
+                +
+              </button>
+            </div> */}
           </div>
         </div>
 
@@ -376,7 +394,9 @@ export default function Sales01() {
                 </tr>
               ) : (
                 salItems.map((item, index) => (
-                  <tr key={index}>
+                  <tr
+                    key={index}
+                    className={item.itm_qty < 0 ? "row-return" : ""}>
                     <td>{item.itm_cd}</td>
                     <td>{item.itm_desc}</td>
                     <td className="text-right">
@@ -447,7 +467,12 @@ export default function Sales01() {
             </div>
             <div>
               <label>Gross Amt</label>
-              <input type="text" readOnly value={salTotals.sal_amt} />
+              <input
+                type="text"
+                readOnly
+                value={salTotals.sal_amt}
+                className={salTotals.sal_amt < 0 ? "negative-total" : ""}
+              />
             </div>
             <div>
               <label>Discount</label>
