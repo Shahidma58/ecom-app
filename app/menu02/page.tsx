@@ -5,34 +5,31 @@ import { useRouter } from "next/navigation";
 
 // Define the single, comprehensive Tailwind class for all 12 buttons.
 const GREEN_BUTTON_STYLE =
-  'bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-xl ' +
+  'bg-blue-500 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl ' +
   'shadow-lg hover:shadow-xl transition duration-300 ease-in-out transform hover:scale-[1.02] ' +
   'flex items-center justify-center space-x-2 w-full text-lg';
 
 // Define the names and explicit paths for the 12 mock pages as an array of objects.
+interface PageInfo {
+  name: string;
+  path: string;
+}
 const PAGE_DATA = [
-  { name: "Dashboard", path: "/pos/dashboard" },
-  { name: "Update Product Info.", path: "/pos/prods/upd_info" },
-  { name: "Update Prices", path: "/pos/prods/upd_prices" },
-  { name: "Account Statement", path: "/pos/accts/stmt" },
-  { name: "General Ledgers", path: "/pos/gen_ledg/gl_enq" },
-  { name: "Customer Accounts", path: "/pos/accts/acct_enq" },
+  { name: "Update Account Info ", path: "/pos/accts/acctmgmt" },
+  { name: "Update G/L Info", path: "/pos/gen_ledg/glmgmt" },
+  { name: "Update Product Info.", path: "/pos/prods/save_prod" },
   { name: "Update Products Prices", path: "/pos/prods/upd_prices" },
-  { name: "Update Account Info", path: "/pos/accts/acctmgmt" },
-  { name: "aaaaaaaaa", path: "/calendar" },
-  { name: "Pay Cash", path: "/pos/finTran/payCash" },
-  { name: "Recieve Cash", path: "/pos/finTran/rcvCash" },
-  { name: "Counter Sales", path: "/pos/sales01" }
  ];
 
 const App = () => {
   const router = useRouter();
-  const [navigationStatus, setNavigationStatus] = useState("Point of Sale");
-
+//  const [navigationStatus, setNavigationStatus] = useState("Point of Sale");
+    const [navigationStatus, setNavigationStatus] = 
+    useState<string>("Update Product/GL Information");
   // Function to handle the navigation event using the explicit path
-  const handleNavigation = (name, path) => {
+  const handleNavigation = (name: string, path: string) => {
     // In a real Next.js app, you would use: useRouter().push(path);
-    console.log(`Navigating to: ${path}`);
+//    console.log(`Navigating to: ${path}`);
 //    setNavigationStatus(`Mapsd to: ${name} (${path})`);
     router.push(path);
   };
@@ -52,7 +49,7 @@ const App = () => {
       </header> */}
 
       {/* Navigation Status Message */}
-      <div className="w-full max-w-4xl text-center mb-8 p-3 bg-emerald-100 text-emerald-800 font-medium rounded-lg">
+      <div className="w-full max-w-4xl text-center mb-8 p-3 bg-teal-700 text-white font-extrabold rounded-lg">
         {navigationStatus}
       </div>
 

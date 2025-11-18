@@ -270,6 +270,7 @@ export default function CheckoutPage() {
                   title="Cash on Hand G/L"
                   className={inputClassSmall}
                   onChange={handleInputChange}
+                  readOnly
                 />
               </div>
               <div className="md:col-span-2">

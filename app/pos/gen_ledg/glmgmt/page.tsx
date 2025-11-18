@@ -119,7 +119,7 @@ export default function GenLedgForm() {
   // JSX FORM
   // ---------------------------------------------------------
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4">
+    <div className="min-h-screen max-w-4xl bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 py-8 px-4 justify-items-center">
       <div className="max-w-4xl mx-auto">
         {/* HEADER */}
         <div

@@ -93,9 +93,7 @@ model SubPosts_Mod {
 
 model Prods_Mod {
   prd_cd    Int @id
-  bar_cd       String
   prd_desc     String
-  inp_by       String
   prd_sku      String
   prd_qoh      Int
   prd_re_ord   Int
@@ -114,6 +112,7 @@ model Prods_Mod {
   prd_stat     String?
   disc_pct     Int?
   max_pur_qty  Int?
+  inp_by       String
   created_at   DateTime   @default(now())
 
   @@map("products")
@@ -242,3 +241,19 @@ model accts_Mod {
   gen_ledg   gen_Ledg_Mod? @relation(fields: [ac_gl], references: [gl_cd])
 }
 
+model brands_Mod {
+  brand_name String   @id @db.VarChar(25)
+  logo_lnk   String? @db.VarChar(64)
+  manuf_by   String? @db.VarChar(35)
+  inp_by     String @db.VarChar(15)
+  inp_dt     DateTime  @default(now())
+  @@map("brands")
+}
+
+model prod_categ_Mod {
+  cat_cd     String   @id @db.VarChar(15)
+  cat_desc   String?  @db.VarChar(30)
+  inp_by     String   @db.VarChar(15)
+  inp_dt     DateTime @default(now())
+  @@map("prod_categ")
+}
