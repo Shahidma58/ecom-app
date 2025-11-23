@@ -20,9 +20,18 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["*"]
+      "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/api/ecom/save_cart/route.js", "app/api/pos/save_tran/route.js"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "app/api/ecom/save_cart/route.js",
+    "app/api/pos/save_tran/route.js",
+    "app/docs/page.tsx",
+    "swagger.ts"
+  ],
   "exclude": ["node_modules"]
 }
