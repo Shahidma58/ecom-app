@@ -1,31 +1,20 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+
 // POST API to insert a cart record
 export async function POST(req) {
-  //  var wTrn_dt = 0;
   try {
     console.log("------------- into save tran API");
     const body = await req.json();
-    //  console.log("Body: ", body)
-    //    const { tranInfo, cartItems } = body;
-    const { salTots, salItms, tran_dt } = body;
-    console.log("Batch Info: ", salTots, salItms, tran_dt);
-
-    // if (!user_id || !cart_date || !cart_items) {
-    //   return NextResponse.json(
-    //     { success: false, message: "Missing required fields" },
-    //     { status: 400 }
-    //   );
-    // }
-    //  wmod_id = seq_params['mod_id'];
-    //  wtrn_dt = seq_params['trn_dt'];
+    const { salTots, salItms, tran_dt, isReturn } = body;
+    console.log("Batch Info: ", salTots, salItms, tran_dt, "Return:", isReturn);
 
     // Step 1: Generate new Cart ID using PostgreSQL function
     const tranSeqResult = await prisma.$queryRawUnsafe(
       `SELECT get_trn_seq(${tran_dt}, 'POS') AS tran_id;`
-      //      `SELECT get_trn_seq(${tran_dt['trn_dt']}, 'POS') AS tran_id;`
     );
     console.log(tranSeqResult);
+
     // Prisma returns an array from raw query
     let wTran_id = tranSeqResult?.[0]?.tran_id;
     if (typeof wTran_id === "bigint") {
@@ -33,37 +22,62 @@ export async function POST(req) {
     }
     console.log("------------- into API");
     console.log(wTran_id);
+
     if (!wTran_id) {
       throw new Error("Failed to generate Transaction ID");
     }
-    // Step 2: Insert record into carts table
+
+    // Step 2: Prepare salTots with negative amounts if return
     salTots.sal_id = wTran_id;
-    // Adds the cart_id property directly to the cartItems
-    // salItms.forEach((item, index) => {
-    //   item.sal_id = wTran_id;
-    //   item.sal_id_serl =  index + 1;
-    // });
-    // delete tranInfo.drac_no;
-    //-==============  Save ============================================
+
+    // Convert to proper number types
+    salTots.sal_qty = Number(salTots.sal_qty);
+    salTots.sal_amt = Number(salTots.sal_amt);
+    salTots.sal_disc = Number(salTots.sal_disc);
+    salTots.sal_items = Number(salTots.sal_items);
+
+    if (isReturn) {
+      salTots.sal_qty = Math.abs(salTots.sal_qty) * -1;
+      salTots.sal_amt = Math.abs(salTots.sal_amt) * -1;
+      salTots.sal_disc = Math.abs(salTots.sal_disc) * -1;
+    }
+
+    // Step 3: Save Sales Batch
     const crTran = await prisma.Sales_Batch_Mod.create({
       data: salTots,
     });
-    //-===========================================================
-    //    delete salItms.itm_desc;
-    // Adds the sal_id property directly to the sal_Itms
+
+    // Step 4: Prepare salItms with negative amounts if return
     salItms.forEach((item, index) => {
       item.sal_id = wTran_id;
+
+      // Convert string/number values to proper types
+      item.itm_cd = Number(item.itm_cd);
+      item.itm_rsp = Number(item.itm_rsp);
+      item.itm_qty = Number(item.itm_qty);
+      item.itm_disc = Number(item.itm_disc);
+      item.itm_tax = Number(item.itm_tax);
+      item.itm_cost = Number(item.itm_cost);
+      item.itm_amt = Number(item.itm_amt);
+
+      if (isReturn) {
+        item.itm_qty = Math.abs(item.itm_qty) * -1;
+        item.itm_amt = Math.abs(item.itm_amt) * -1;
+        item.itm_disc = Math.abs(item.itm_disc) * -1;
+      }
     });
 
     console.log("Sale_items: ", salItms);
+
     const result = await prisma.Sales_Tran_Mod.createMany({
       data: salItms,
       skipDuplicates: true,
     });
+
     return NextResponse.json(
       {
         success: true,
-        message: "Transaction inserted and Updated successfully",
+        message: `${isReturn ? "Return" : "Transaction"} inserted successfully`,
         tran_id: wTran_id,
       },
       { status: 201 }
