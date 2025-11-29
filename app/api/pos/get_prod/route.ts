@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { AuthenticatedRequest, withAuth } from "@/app/lib/authMiddleware";
 
-export async function GET(req: NextRequest) {
+export const GET = withAuth(async (req: AuthenticatedRequest) => {
   try {
+    // const userId = req.user?.userId;
+    // console.log(userId);
     // Read parameter from URL: ?prd_cd=123
     const searchParams = req.nextUrl.searchParams;
     const prd_cd = searchParams.get("prd_cd");
@@ -57,4 +60,4 @@ export async function GET(req: NextRequest) {
   } finally {
     await prisma.$disconnect();
   }
-}
+});
