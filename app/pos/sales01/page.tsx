@@ -1,7 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./sales01.css";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
+import { api, setAccessToken } from "@/app/lib/apiClient";
 
 const gVars = { gUser: "Demo User" };
 
@@ -15,6 +17,7 @@ const get_str_date = () => new Date().toISOString().split("T")[0];
 
 export default function Sales01() {
   const router = useRouter();
+  const { user, accessToken, isLoading } = useAuth();
   const today = new Date();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +72,23 @@ export default function Sales01() {
     itm_stat: "A",
   });
 
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push("/pos/login");
+    }
+  }, [user, isLoading, router]);
+
+  // Sync access token with API client
+  useEffect(() => {
+    if (accessToken) {
+      setAccessToken(accessToken);
+    }
+  }, [accessToken]);
+
+  if (!user) {
+    return null;
+  }
+
   const fetchProd = async (prd_cd: number) => {
     if (!prd_cd || prd_cd === 0) return;
 
@@ -76,7 +96,8 @@ export default function Sales01() {
       setLoading(true);
       setError(null);
 
-      const resp = await fetch(`/api/pos/get_prod?prd_cd=${prd_cd}`);
+      // Use api client instead of fetch - it automatically adds the token
+      const resp = await api.get(`/api/pos/get_prod?prd_cd=${prd_cd}`);
       const data = await resp.json();
 
       if (!resp.ok) throw new Error(data.error || "Failed to fetch Product");
@@ -135,14 +156,10 @@ export default function Sales01() {
         (sum, item) => sum + Number(item.itm_qty),
         0
       );
-      let totalAmount = updatedItems.reduce(
+      const totalAmount = updatedItems.reduce(
         (sum, item) => sum + Number(item.itm_amt),
         0
       );
-
-      if (returnMode) {
-        totalAmount = totalAmount * -1;
-      }
       const totalDisc = updatedItems.reduce(
         (sum, item) => sum + Number(item.itm_disc),
         0
@@ -178,11 +195,24 @@ export default function Sales01() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    // Convert to number for numeric fields
+    const numericFields = [
+      "itm_cd",
+      "itm_qty",
+      "itm_rsp",
+      "itm_disc",
+      "itm_amt",
+    ];
+    const processedValue = numericFields.includes(name)
+      ? Number(value) || 0
+      : value;
+
     setForm((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: processedValue,
       ...(name === "itm_qty" || name === "itm_rsp"
-        ? { itm_amt: Number(prev.itm_rsp || 0) * Number(value || 0) }
+        ? { itm_amt: Number(prev.itm_rsp || 0) * Number(processedValue || 0) }
         : {}),
     }));
   };
@@ -228,6 +258,7 @@ export default function Sales01() {
         salTots: salTotals,
         salItms: salItems,
         tran_dt: wTrn_Dt,
+        isReturn: returnMode,
       };
 
       const apiResponse = await fetch("/api/pos/save_tran", {
@@ -251,6 +282,7 @@ export default function Sales01() {
       setLoading(false);
     }
   };
+
   const updateTotals = (updatedItems: FormItem[]) => {
     const totalQty = updatedItems.reduce(
       (sum, item) => sum + Number(item.itm_qty),
@@ -363,11 +395,6 @@ export default function Sales01() {
                 Return
               </button>
             </div>
-            {/* <div className="sales-form-col-1">
-              <button className="sales-btn-add" onClick={handleAddItem}>
-                +
-              </button>
-            </div> */}
           </div>
         </div>
 
@@ -394,9 +421,7 @@ export default function Sales01() {
                 </tr>
               ) : (
                 salItems.map((item, index) => (
-                  <tr
-                    key={index}
-                    className={item.itm_qty < 0 ? "row-return" : ""}>
+                  <tr key={index} className={returnMode ? "row-return" : ""}>
                     <td>{item.itm_cd}</td>
                     <td>{item.itm_desc}</td>
                     <td className="text-right">
@@ -471,7 +496,7 @@ export default function Sales01() {
                 type="text"
                 readOnly
                 value={salTotals.sal_amt}
-                className={salTotals.sal_amt < 0 ? "negative-total" : ""}
+                className={returnMode ? "negative-total" : ""}
               />
             </div>
             <div>
@@ -483,7 +508,11 @@ export default function Sales01() {
                 onClick={handleSaveTran}
                 disabled={loading || salItems.length === 0}
                 className="sales-btn-save">
-                {loading ? "Processing..." : "💾 Save"}
+                {loading
+                  ? "Processing..."
+                  : returnMode
+                  ? "💾 Save Return"
+                  : "💾 Save"}
               </button>
             </div>
           </div>
