@@ -23,6 +23,8 @@ export default function Sales01() {
   const [error, setError] = useState<string | null>(null);
   const [salItems, setSalItems] = useState<FormItem[]>([]);
   const [returnMode, setReturnMode] = useState(false);
+  const [customerMobile, setCustomerMobile] = useState<string>("");
+
   const [salTotals, setSalTotals] = useState<SalTotal>({
     sal_id: 0,
     sal_dt: today,
@@ -31,6 +33,7 @@ export default function Sales01() {
     sal_qty: 0,
     sal_disc: 0,
     inp_by: gVars.gUser,
+    sal_mbl: undefined,
   });
 
   const wTrn_Dt = calc_dayofyear();
@@ -50,14 +53,16 @@ export default function Sales01() {
   }
 
   interface SalTotal {
-    sal_id: number;
-    sal_dt: Date;
-    sal_qty: number;
-    sal_amt: number;
-    sal_items: number;
-    sal_disc: number;
-    inp_by: string;
-  }
+  sal_id: number;
+  sal_dt: Date;
+  sal_qty: number;
+  sal_amt: number;
+  sal_items: number;
+  sal_disc: number;
+  inp_by: string;
+  sal_mbl?: number; // 👈 NEW
+}
+
 
   const [form, setForm] = useState<FormItem>({
     sal_id: 0,
@@ -174,6 +179,8 @@ export default function Sales01() {
         sal_items: totalItems,
         sal_disc: totalDisc,
         inp_by: gVars.gUser,
+        sal_mbl: customerMobile ? Number(customerMobile) : undefined,
+
       });
 
       setForm({
@@ -243,6 +250,7 @@ export default function Sales01() {
         sal_items: totalItems,
         sal_disc: totalDisc,
         inp_by: gVars.gUser,
+        sal_mbl: customerMobile ? Number(customerMobile) : undefined,
       });
 
       return updatedItems;
@@ -261,11 +269,8 @@ export default function Sales01() {
         isReturn: returnMode,
       };
 
-      const apiResponse = await fetch("/api/pos/save_tran", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(tranPayload),
-      });
+      const apiResponse = await api.post("/api/pos/save_tran", tranPayload);
+
 
       const data = await apiResponse.json();
 
@@ -306,6 +311,7 @@ export default function Sales01() {
       sal_items: totalItems,
       sal_disc: totalDisc,
       inp_by: gVars.gUser,
+      sal_mbl: customerMobile ? Number(customerMobile) : undefined,
     });
   };
 
@@ -313,10 +319,40 @@ export default function Sales01() {
     <div className="sales-container">
       <header className="sales-header">
         <div className="sales-header-content">
-          <h1 className="sales-title">HerbaGlam - Cosmetics Universe</h1>
-          <div className="sales-date">{wStr_Dt}</div>
+          <div className="sales-header-left">
+            <h1 className="sales-title">HerbaGlam - Cosmetics Universe</h1>
+            {user?.branch_code && (
+              <span className="branch-badge">Branch: {user.branch_code}</span>
+            )}
+          </div>
+          <div className="sales-header-right">
+            <div className="user-info">
+              <span className="user-name">{user?.name}</span>
+            </div>
+            <div className="sales-date">{wStr_Dt}</div>
+          </div>
         </div>
       </header>
+
+      {/* Customer Info */}
+      <div className="sales-form-card">
+        <div className="sales-form-grid">
+          <div className="sales-form-col-4">
+            <input
+              type="tel"
+              name="sal_mbl"
+              placeholder="Customer Mobile Number"
+              className="sales-input"
+              value={customerMobile}
+              maxLength={15}
+              onChange={(e) =>
+                setCustomerMobile(e.target.value.replace(/\D/g, ""))
+              }
+            />
+          </div>
+        </div>
+      </div>
+
 
       <div className="sales-content">
         {/* Product Input */}

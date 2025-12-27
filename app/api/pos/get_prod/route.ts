@@ -4,8 +4,7 @@ import { AuthenticatedRequest, withAuth } from "@/app/lib/authMiddleware";
 
 export const GET = withAuth(async (req: AuthenticatedRequest) => {
   try {
-    // const userId = req.user?.userId;
-    // console.log(userId);
+     const user = req.user;
     // Read parameter from URL: ?prd_cd=123
     const searchParams = req.nextUrl.searchParams;
     const prd_cd = searchParams.get("prd_cd");
@@ -26,11 +25,11 @@ export const GET = withAuth(async (req: AuthenticatedRequest) => {
     }
 
     // Prisma query
-    const product = await prisma.prods_Mod.findFirst({
+    const product = await prisma.products_vw.findFirst({
       where: {
-        prd_cd: prdCode,
+        bar_cd: prdCode,
         prd_qoh: { gt: 0 },
-        prd_stat: "Active",
+        brn_cd: user?.branch_code
       },
       select: {
         prd_desc: true,

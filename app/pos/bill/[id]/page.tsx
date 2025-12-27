@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import "./bill.css";
+import { useAuth } from "@/app/context/AuthContext";
 
 interface SaleItem {
   itm_cd: number;
@@ -21,6 +22,7 @@ interface SaleTotal {
   sal_items: number;
   sal_disc: number;
   inp_by: string;
+  brn_cd?: string;
 }
 
 export default function BillPage() {
@@ -55,65 +57,107 @@ export default function BillPage() {
   if (!saleTotal) return <div className="bill-error">No bill found.</div>;
 
   return (
-    <div className="bill-container">
-      <div className="bill-header">
-        <h1 className="bill-title">🧾 HerbaGlam - Customer Bill</h1>
-        <div className="bill-info">
-          <p>
-            <strong>Bill No:</strong> {saleTotal.sal_id}
-          </p>
-          <p>
-            <strong>Date:</strong> {new Date(saleTotal.sal_dt).toLocaleString()}
-          </p>
-          <p>
-            <strong>Cashier:</strong> {saleTotal.inp_by}
-          </p>
+    <div className="receipt-page">
+      <div className="receipt-container">
+        {/* Header */}
+        <div className="receipt-header">
+          <h1 className="store-name">HerbaGlam</h1>
+          <p className="store-info">Premium Beauty & Wellness</p>
+          <p className="store-info">123 Main Street, City</p>
+          <p className="store-info">Tel: (123) 456-7890</p>
+        </div>
+
+        <div className="receipt-divider"></div>
+
+        {/* Bill Info */}
+        <div className="info-section">
+          <div className="info-row">
+            <span>Bill No:</span>
+            <span>{saleTotal.sal_id}</span>
+          </div>
+          <div className="info-row">
+            <span>Date:</span>
+            <span>{new Date(saleTotal.sal_dt).toLocaleString()}</span>
+          </div>
+          <div className="info-row">
+            <span>Cashier:</span>
+            <span>{saleTotal.inp_by}</span>
+          </div>
+          {saleTotal.brn_cd && (
+            <div className="info-row">
+              <span>Branch:</span>
+              <span>{ saleTotal.brn_cd}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="receipt-divider"></div>
+
+        {/* Items */}
+        <div className="items-section">
+          {saleItems.map((item, index) => (
+            <div key={index} className="receipt-item">
+              <div className="item-header">
+                <span className="item-desc">{item.itm_desc}</span>
+                <span className="item-code">#{item.itm_cd}</span>
+              </div>
+              <div className="item-details">
+                <span>
+                  {item.itm_qty} x {Number(item.itm_rsp || 0).toFixed(2)}
+                </span>
+                {item.itm_disc > 0 && (
+                  <span className="discount">-{item.itm_disc}</span>
+                )}
+                <span className="item-total">
+                  {Number(item.itm_amt || 0).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="receipt-divider"></div>
+
+        {/* Totals */}
+        <div className="totals-section">
+          <div className="total-row">
+            <span>Total Items:</span>
+            <span>{saleTotal.sal_items}</span>
+          </div>
+          <div className="total-row">
+            <span>Total Qty:</span>
+            <span>{saleTotal.sal_qty}</span>
+          </div>
+          {saleTotal.sal_disc > 0 && (
+            <div className="total-row">
+              <span>Total Discount:</span>
+              <span className="discount">-{saleTotal.sal_disc}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="receipt-divider-thick"></div>
+
+        {/* Grand Total */}
+        <div className="grand-total">
+          <span className="grand-total-label">TOTAL</span>
+          <span className="grand-total-amount">
+            {Number(saleTotal.sal_amt || 0).toFixed(2)}
+          </span>
+        </div>
+
+        <div className="receipt-divider"></div>
+
+        {/* Footer */}
+        <div className="receipt-footer">
+          <p>THANK YOU FOR SHOPPING!</p>
+          <p>Visit us again soon</p>
+          <div className="barcode">||||||||||||||||||||</div>
         </div>
       </div>
 
-      <table className="bill-table">
-        <thead>
-          <tr>
-            <th>Code</th>
-            <th>Description</th>
-            <th>Qty</th>
-            <th>Price</th>
-            <th>Disc</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {saleItems.map((item, index) => (
-            <tr key={index}>
-              <td>{item.itm_cd}</td>
-              <td>{item.itm_desc}</td>
-              <td>{item.itm_qty}</td>
-              <td>{Number(item.itm_rsp || 0).toFixed(2)}</td>
-              <td>{item.itm_disc}</td>
-              <td>{Number(item.itm_amt || 0).toFixed(2)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <div className="bill-summary">
-        <p>
-          <strong>Total Qty:</strong> {saleTotal.sal_qty}
-        </p>
-        <p>
-          <strong>Total Items:</strong> {saleTotal.sal_items}
-        </p>
-        <p>
-          <strong>Total Discount:</strong> {saleTotal.sal_disc}
-        </p>
-        <p className="bill-net">
-          💰 <strong>Net Amount:</strong>{" "}
-          {Number(saleTotal.sal_amt || 0).toFixed(2)}
-        </p>
-      </div>
-
       <button onClick={() => window.print()} className="print-btn">
-        🖨️ Print Bill
+        🖨️ Print Receipt
       </button>
     </div>
   );

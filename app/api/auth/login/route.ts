@@ -10,7 +10,7 @@ interface UserFromDB {
   email: string;
   password: string;
   name: string;
-  isActive: boolean | null;
+  branch_code: number
 }
 
 async function findUserByEmail(email: string): Promise<UserFromDB | null> {
@@ -31,7 +31,7 @@ async function findUserByEmail(email: string): Promise<UserFromDB | null> {
       email: user.usr_email,
       password: user.pswd_hash || "",
       name: user.usr_name,
-      isActive: user.is_active,
+      branch_code: user.br_cd
     };
   } catch (error) {
     console.error("Database query error:", error);
@@ -61,36 +61,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user is active
-    if (user.isActive === false) {
-      return NextResponse.json(
-        { error: "Account is inactive" },
-        { status: 403 }
-      );
-    }
+   
 
     // Check if password is set
-    if (!user.password) {
-      return NextResponse.json(
-        { error: "Password not set for this account" },
-        { status: 401 }
-      );
-    }
+    // if (!user.password) {
+    //   return NextResponse.json(
+    //     { error: "Password not set for this account" },
+    //     { status: 401 }
+    //   );
+    // }
 
-    // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    // // Verify password
+    // const isValidPassword = await bcrypt.compare(password, user.password);
 
-    if (!isValidPassword) {
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
-      );
-    }
+    // if (!isValidPassword) {
+    //   return NextResponse.json(
+    //     { error: "Invalid credentials" },
+    //     { status: 401 }
+    //   );
+    // }
 
     // Generate tokens
     const tokenPayload = {
       userId: user.id,
       email: user.email,
+      branch_code: user.branch_code,
+      username: user.name
     };
 
     const accessToken = generateAccessToken(tokenPayload);
@@ -109,6 +105,7 @@ export async function POST(request: NextRequest) {
         id: user.id,
         email: user.email,
         name: user.name,
+        branch_code: user.branch_code
       },
     });
 

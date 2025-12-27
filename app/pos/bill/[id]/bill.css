@@ -1,91 +1,158 @@
-/* General Layout */
-.bill-container {
-  max-width: 750px;
-  margin: 40px auto;
-  background-color: #f8f9fa;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 24px;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+/* Page Layout */
+.receipt-page {
+  min-height: 100vh;
+  background-color: #e5e5e5;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Receipt Container */
+.receipt-container {
+  width: 320px;
+  background-color: white;
+  padding: 20px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Header Section */
-.bill-header {
+.receipt-header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
-.bill-title {
-  font-size: 1.5rem;
-  margin-bottom: 8px;
-  color: #444;
+.store-name {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 0 5px 0;
+  letter-spacing: 1px;
 }
 
-.bill-info {
+.store-info {
+  margin: 2px 0;
+  font-size: 11px;
+}
+
+/* Dividers */
+.receipt-divider {
+  border-top: 1px dashed #333;
+  margin: 12px 0;
+}
+
+.receipt-divider-thick {
+  border-top: 2px solid #333;
+  margin: 12px 0;
+}
+
+/* Info Section */
+.info-section {
+  margin-bottom: 10px;
+}
+
+.info-row {
   display: flex;
-  justify-content: center;
-  gap: 20px;
-  font-size: 0.95rem;
-  color: #555;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 11px;
 }
 
-/* Table Styling */
-.bill-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  font-size: 0.9rem;
+/* Items Section */
+.items-section {
+  margin-bottom: 10px;
 }
 
-.bill-table th,
-.bill-table td {
-  border: 1px solid #ccc;
-  padding: 8px 10px;
+.receipt-item {
+  margin-bottom: 12px;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.item-desc {
+  font-weight: 600;
+  flex: 1;
+}
+
+.item-code {
+  font-size: 10px;
+  color: #666;
+}
+
+.item-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  padding-left: 10px;
+}
+
+.item-total {
+  font-weight: 600;
+}
+
+.discount {
+  color: #d9534f;
+}
+
+/* Totals Section */
+.totals-section {
+  margin-bottom: 10px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+/* Grand Total */
+.grand-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.grand-total-label {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.grand-total-amount {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Footer */
+.receipt-footer {
   text-align: center;
+  margin-top: 15px;
+  font-size: 11px;
 }
 
-.bill-table th {
-  background-color: #e9ecef;
-  font-weight: 600;
-  color: #333;
-}
-
-.bill-table tr:nth-child(even) {
-  background-color: #f4f6f8;
-}
-
-/* Summary Section */
-.bill-summary {
-  margin-top: 25px;
-  border-top: 1px solid #ddd;
-  padding-top: 15px;
-  font-size: 0.95rem;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px 20px;
-}
-
-.bill-net {
-  grid-column: span 2;
-  text-align: right;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #2e3f70;
+.barcode {
+  margin-top: 10px;
+  font-size: 16px;
+  letter-spacing: 2px;
 }
 
 /* Print Button */
 .print-btn {
-  display: block;
-  margin: 30px auto 10px auto;
-  padding: 10px 22px;
+  margin-top: 20px;
+  padding: 12px 24px;
   background-color: #4b6587;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 14px;
   transition: background-color 0.2s ease;
 }
 
@@ -93,11 +160,32 @@
   background-color: #3a5373;
 }
 
-/* Loading & Error */
+/* Loading & Error States */
 .bill-loading,
 .bill-error {
   text-align: center;
-  font-size: 1.1rem;
-  color: #666;
   padding: 40px;
+  font-size: 16px;
+}
+
+.bill-error {
+  color: #d9534f;
+}
+
+/* Print Styles */
+@media print {
+  .receipt-page {
+    background-color: white;
+    padding: 0;
+  }
+
+  .print-btn {
+    display: none;
+  }
+
+  .receipt-container {
+    box-shadow: none;
+    margin: 0;
+    padding: 10px;
+  }
 }
