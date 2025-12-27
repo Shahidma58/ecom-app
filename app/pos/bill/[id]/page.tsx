@@ -56,6 +56,11 @@ export default function BillPage() {
   if (loading) return <div className="bill-loading">Loading bill...</div>;
   if (!saleTotal) return <div className="bill-error">No bill found.</div>;
 
+  // Calculate subtotal (before discount)
+  const subtotal = saleItems.reduce((sum, item) => {
+    return sum + (Number(item.itm_rsp) * Number(item.itm_qty));
+  }, 0);
+
   return (
     <div className="receipt-page">
       <div className="receipt-container">
@@ -86,7 +91,7 @@ export default function BillPage() {
           {saleTotal.brn_cd && (
             <div className="info-row">
               <span>Branch:</span>
-              <span>{ saleTotal.brn_cd}</span>
+              <span>{saleTotal.brn_cd}</span>
             </div>
           )}
         </div>
@@ -95,25 +100,45 @@ export default function BillPage() {
 
         {/* Items */}
         <div className="items-section">
-          {saleItems.map((item, index) => (
-            <div key={index} className="receipt-item">
-              <div className="item-header">
-                <span className="item-desc">{item.itm_desc}</span>
-                <span className="item-code">#{item.itm_cd}</span>
-              </div>
-              <div className="item-details">
-                <span>
-                  {item.itm_qty} x {Number(item.itm_rsp || 0).toFixed(2)}
-                </span>
+          {saleItems.map((item, index) => {
+            const itemDiscount = Number(item.itm_disc) * Number(item.itm_qty);
+            const netPrice = Number(item.itm_rsp) - Number(item.itm_disc);
+            
+            return (
+              <div key={index} className="receipt-item">
+                <div className="item-header">
+                  <span className="item-desc">{item.itm_desc}</span>
+                  <span className="item-code">#{item.itm_cd}</span>
+                </div>
+                <div className="item-details">
+                  <span>
+                    {item.itm_qty} x {Number(item.itm_rsp).toFixed(2)}
+                  </span>
+                  <span className="item-total">
+                    {(Number(item.itm_rsp) * Number(item.itm_qty)).toFixed(2)}
+                  </span>
+                </div>
                 {item.itm_disc > 0 && (
-                  <span className="discount">-{item.itm_disc}</span>
+                  <>
+                    <div className="item-discount-row">
+                      <span className="discount-label">
+                        Discount ({Number(item.itm_disc).toFixed(2)}/item)
+                      </span>
+                      <span className="discount">
+                        -{itemDiscount.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="item-net-row">
+                      <span>Net: {item.itm_qty} x {netPrice.toFixed(2)}</span>
+                      <span className="item-net-total">
+                        {Number(item.itm_amt).toFixed(2)}
+                      </span>
+                    </div>
+                  </>
                 )}
-                <span className="item-total">
-                  {Number(item.itm_amt || 0).toFixed(2)}
-                </span>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="receipt-divider"></div>
@@ -128,10 +153,14 @@ export default function BillPage() {
             <span>Total Qty:</span>
             <span>{saleTotal.sal_qty}</span>
           </div>
+          <div className="total-row">
+            <span>Subtotal:</span>
+            <span>{subtotal.toFixed(2)}</span>
+          </div>
           {saleTotal.sal_disc > 0 && (
-            <div className="total-row">
+            <div className="total-row discount-row">
               <span>Total Discount:</span>
-              <span className="discount">-{saleTotal.sal_disc}</span>
+              <span className="discount">-{Number(saleTotal.sal_disc).toFixed(2)}</span>
             </div>
           )}
         </div>
@@ -142,9 +171,15 @@ export default function BillPage() {
         <div className="grand-total">
           <span className="grand-total-label">TOTAL</span>
           <span className="grand-total-amount">
-            {Number(saleTotal.sal_amt || 0).toFixed(2)}
+            {Number(saleTotal.sal_amt).toFixed(2)}
           </span>
         </div>
+
+        {saleTotal.sal_disc > 0 && (
+          <div className="savings-message">
+            🎉 You saved {Number(saleTotal.sal_disc).toFixed(2)} today!
+          </div>
+        )}
 
         <div className="receipt-divider"></div>
 

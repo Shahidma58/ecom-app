@@ -66,13 +66,19 @@
 }
 
 .receipt-item {
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px dotted #ddd;
+}
+
+.receipt-item:last-child {
+  border-bottom: none;
 }
 
 .item-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
 }
 
 .item-desc {
@@ -90,14 +96,44 @@
   justify-content: space-between;
   font-size: 11px;
   padding-left: 10px;
+  margin-bottom: 2px;
 }
 
 .item-total {
   font-weight: 600;
 }
 
+/* Discount Rows */
+.item-discount-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  padding-left: 10px;
+  margin-top: 2px;
+  color: #d9534f;
+}
+
+.discount-label {
+  font-style: italic;
+}
+
+.item-net-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  padding-left: 10px;
+  margin-top: 2px;
+  font-weight: 600;
+  color: #28a745;
+}
+
+.item-net-total {
+  font-weight: 700;
+}
+
 .discount {
   color: #d9534f;
+  font-weight: 600;
 }
 
 /* Totals Section */
@@ -110,6 +146,11 @@
   justify-content: space-between;
   margin-bottom: 4px;
   font-size: 11px;
+}
+
+.discount-row {
+  color: #d9534f;
+  font-weight: 600;
 }
 
 /* Grand Total */
@@ -128,6 +169,18 @@
 .grand-total-amount {
   font-size: 18px;
   font-weight: bold;
+}
+
+/* Savings Message */
+.savings-message {
+  text-align: center;
+  padding: 8px;
+  background-color: #d4edda;
+  color: #155724;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 8px;
 }
 
 /* Footer */
@@ -187,5 +240,10 @@
     box-shadow: none;
     margin: 0;
     padding: 10px;
+  }
+
+  .savings-message {
+    background-color: transparent;
+    border: 1px solid #28a745;
   }
 }

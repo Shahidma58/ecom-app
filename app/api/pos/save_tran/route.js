@@ -50,24 +50,29 @@ export const POST = withAuth(async (req) => {
       salTots.sal_disc *= -1;
     }
 
-    // Prepare sale items
-    salItms.forEach((item) => {
-      item.sal_id = wTran_id;
-      item.itm_cd = Number(item.itm_cd);
-      item.itm_qty = Number(item.itm_qty);
-      item.itm_amt = Number(item.itm_amt);
-      item.itm_disc = Number(item.itm_disc);
-      item.itm_tax = Number(item.itm_tax);
-      item.itm_cost = Number(item.itm_cost);
-      item.itm_rsp = Number(item.itm_rsp);
-      item.itm_desc = item.itm_desc ?? "";
-      item.itm_stat = item.itm_stat ?? "A"; // default status
+    // Prepare sale items and remove frontend-only fields
+    const dbSalItms = salItms.map((item) => {
+      // Create a clean object with only database fields
+      const dbItem = {
+        sal_id: wTran_id,
+        itm_cd: Number(item.itm_cd),
+        itm_desc: item.itm_desc ?? "",
+        itm_qty: Number(item.itm_qty),
+        itm_rsp: Number(item.itm_rsp),
+        itm_disc: Number(item.itm_disc),
+        itm_tax: Number(item.itm_tax),
+        itm_amt: Number(item.itm_amt),
+        itm_cost: Number(item.itm_cost),
+        itm_stat: item.itm_stat ?? "A",
+      };
 
       if (isReturn) {
-        item.itm_qty *= -1;
-        item.itm_amt *= -1;
-        item.itm_disc *= -1;
+        dbItem.itm_qty *= -1;
+        dbItem.itm_amt *= -1;
+        dbItem.itm_disc *= -1;
       }
+
+      return dbItem;
     });
 
     // Transaction (Atomic)
@@ -79,24 +84,38 @@ export const POST = withAuth(async (req) => {
 
       // Save items
       await tx.sales_detl_Mod.createMany({
-        data: salItms,
+        data: dbSalItms,
         skipDuplicates: true,
       });
 
       // Deduct stock from prod_info_Mod
-      for (const item of salItms) {
-        await tx.prod_info_Mod.updateMany({
-          where: {
-            prd_cd: item.itm_cd,
-            brn_cd: brn_cd,
-          },
-          data: {
-            prd_qoh: {
-              decrement: BigInt(Math.abs(item.itm_qty)),
-            },
-          },
-        });
-      }
+      for (const item of dbSalItms) {
+  // Lookup product code from barcode
+  const prod = await tx.products_vw.findFirst({
+    where: {
+      brn_cd: brn_cd,
+      bar_cd: item.itm_cd.toString(), // assuming itm_cd is barcode
+    },
+    select: { prd_cd: true, prd_qoh: true },
+  });
+
+  if (!prod) {
+    continue; // skip this item
+  }
+
+
+  const updateResult = await tx.prod_info_Mod.updateMany({
+    where: {
+      prd_cd: prod.prd_cd,
+      brn_cd: brn_cd,
+    },
+    data: {
+      prd_qoh: {
+        decrement: BigInt(Math.abs(item.itm_qty)),
+      },
+    },
+  });
+}
     });
 
     return NextResponse.json(
@@ -181,4 +200,3 @@ export async function GET(req) {
     );
   }
 }
-

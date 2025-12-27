@@ -50,19 +50,19 @@ export default function Sales01() {
     itm_cost: number;
     itm_amt: number;
     itm_stat: string;
+    itm_net_price: number; // Price after discount
   }
 
   interface SalTotal {
-  sal_id: number;
-  sal_dt: Date;
-  sal_qty: number;
-  sal_amt: number;
-  sal_items: number;
-  sal_disc: number;
-  inp_by: string;
-  sal_mbl?: number; // 👈 NEW
-}
-
+    sal_id: number;
+    sal_dt: Date;
+    sal_qty: number;
+    sal_amt: number;
+    sal_items: number;
+    sal_disc: number;
+    inp_by: string;
+    sal_mbl?: number;
+  }
 
   const [form, setForm] = useState<FormItem>({
     sal_id: 0,
@@ -75,6 +75,7 @@ export default function Sales01() {
     itm_cost: 0,
     itm_amt: 0,
     itm_stat: "A",
+    itm_net_price: 0,
   });
 
   useEffect(() => {
@@ -83,7 +84,6 @@ export default function Sales01() {
     }
   }, [user, isLoading, router]);
 
-  // Sync access token with API client
   useEffect(() => {
     if (accessToken) {
       setAccessToken(accessToken);
@@ -101,7 +101,6 @@ export default function Sales01() {
       setLoading(true);
       setError(null);
 
-      // Use api client instead of fetch - it automatically adds the token
       const resp = await api.get(`/api/pos/get_prod?prd_cd=${prd_cd}`);
       const data = await resp.json();
 
@@ -110,12 +109,16 @@ export default function Sales01() {
       if (data.success) {
         const itemRsp = Number(data.data.max_rsp);
         const itemQty = Number(form.itm_qty);
-        const itemAmt = itemRsp * itemQty;
+        const discountAmt = Number(data.data.discount_amt) || 0;
+        const netPrice = itemRsp - discountAmt;
+        const itemAmt = netPrice * itemQty;
 
         setForm({
           ...form,
           itm_desc: data.data.prd_desc,
           itm_rsp: itemRsp,
+          itm_disc: discountAmt,
+          itm_net_price: netPrice,
           itm_cost: Number(data.data.pur_prc),
           itm_amt: itemAmt,
         });
@@ -125,7 +128,12 @@ export default function Sales01() {
       setError(
         error instanceof Error ? error.message : "Failed to fetch Product"
       );
-      setForm((prev) => ({ ...prev, itm_desc: "" }));
+      setForm((prev) => ({ 
+        ...prev, 
+        itm_desc: "",
+        itm_disc: 0,
+        itm_net_price: 0,
+      }));
     } finally {
       setLoading(false);
     }
@@ -147,7 +155,7 @@ export default function Sales01() {
         updatedItems = [...prevItems];
         const existing = updatedItems[existingIndex];
         const newQty = Number(existing.itm_qty) + Number(form.itm_qty);
-        const newAmt = newQty * Number(existing.itm_rsp);
+        const newAmt = newQty * Number(existing.itm_net_price);
         updatedItems[existingIndex] = {
           ...existing,
           itm_qty: newQty,
@@ -166,7 +174,7 @@ export default function Sales01() {
         0
       );
       const totalDisc = updatedItems.reduce(
-        (sum, item) => sum + Number(item.itm_disc),
+        (sum, item) => sum + (Number(item.itm_disc) * Number(item.itm_qty)),
         0
       );
       const totalItems = updatedItems.length;
@@ -180,7 +188,6 @@ export default function Sales01() {
         sal_disc: totalDisc,
         inp_by: gVars.gUser,
         sal_mbl: customerMobile ? Number(customerMobile) : undefined,
-
       });
 
       setForm({
@@ -194,6 +201,7 @@ export default function Sales01() {
         itm_cost: 0,
         itm_amt: 0,
         itm_stat: "A",
+        itm_net_price: 0,
       });
 
       return updatedItems;
@@ -203,7 +211,6 @@ export default function Sales01() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    // Convert to number for numeric fields
     const numericFields = [
       "itm_cd",
       "itm_qty",
@@ -215,13 +222,20 @@ export default function Sales01() {
       ? Number(value) || 0
       : value;
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: processedValue,
-      ...(name === "itm_qty" || name === "itm_rsp"
-        ? { itm_amt: Number(prev.itm_rsp || 0) * Number(processedValue || 0) }
-        : {}),
-    }));
+    setForm((prev) => {
+      const newForm = { ...prev, [name]: processedValue };
+      
+      if (name === "itm_qty") {
+        const netPrice = Number(prev.itm_net_price || 0);
+        newForm.itm_amt = netPrice * Number(processedValue || 0);
+      } else if (name === "itm_rsp") {
+        const netPrice = Number(processedValue || 0) - Number(prev.itm_disc || 0);
+        newForm.itm_net_price = netPrice;
+        newForm.itm_amt = netPrice * Number(prev.itm_qty || 0);
+      }
+      
+      return newForm;
+    });
   };
 
   const handleRemoveItem = (index: number) => {
@@ -237,7 +251,7 @@ export default function Sales01() {
         0
       );
       const totalDisc = updatedItems.reduce(
-        (sum, item) => sum + Number(item.itm_disc),
+        (sum, item) => sum + (Number(item.itm_disc) * Number(item.itm_qty)),
         0
       );
       const totalItems = updatedItems.length;
@@ -270,8 +284,6 @@ export default function Sales01() {
       };
 
       const apiResponse = await api.post("/api/pos/save_tran", tranPayload);
-
-
       const data = await apiResponse.json();
 
       if (!apiResponse.ok || !data.success)
@@ -298,7 +310,7 @@ export default function Sales01() {
       0
     );
     const totalDisc = updatedItems.reduce(
-      (sum, item) => sum + Number(item.itm_disc),
+      (sum, item) => sum + (Number(item.itm_disc) * Number(item.itm_qty)),
       0
     );
     const totalItems = updatedItems.length;
@@ -353,7 +365,6 @@ export default function Sales01() {
         </div>
       </div>
 
-
       <div className="sales-content">
         {/* Product Input */}
         <div className="sales-form-card">
@@ -407,10 +418,19 @@ export default function Sales01() {
                 name="itm_disc"
                 type="number"
                 placeholder="Disc"
-                className="sales-input"
+                className="sales-input sales-input-readonly"
                 value={form.itm_disc}
-                onChange={handleInputChange}
-                onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
+                readOnly
+              />
+            </div>
+            <div className="sales-form-col-1">
+              <input
+                name="itm_net_price"
+                type="number"
+                placeholder="Net Price"
+                className="sales-input sales-input-readonly"
+                value={form.itm_net_price}
+                readOnly
               />
             </div>
             <div className="sales-form-col-2">
@@ -444,6 +464,7 @@ export default function Sales01() {
                 <th className="text-right">Qty</th>
                 <th className="text-right">Price</th>
                 <th className="text-right">Disc</th>
+                <th className="text-right">Net Price</th>
                 <th className="text-right">Total</th>
                 <th className="text-center">✖</th>
               </tr>
@@ -451,7 +472,7 @@ export default function Sales01() {
             <tbody>
               {salItems.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="sales-table-empty">
+                  <td colSpan={8} className="sales-table-empty">
                     No items added yet
                   </td>
                 </tr>
@@ -473,7 +494,7 @@ export default function Sales01() {
                               );
                               updated[index].itm_qty = newQty;
                               updated[index].itm_amt =
-                                newQty * Number(updated[index].itm_rsp);
+                                newQty * Number(updated[index].itm_net_price);
                               updateTotals(updated);
                               return updated;
                             });
@@ -489,7 +510,7 @@ export default function Sales01() {
                               const newQty = updated[index].itm_qty + 1;
                               updated[index].itm_qty = newQty;
                               updated[index].itm_amt =
-                                newQty * Number(updated[index].itm_rsp);
+                                newQty * Number(updated[index].itm_net_price);
                               updateTotals(updated);
                               return updated;
                             });
@@ -499,7 +520,10 @@ export default function Sales01() {
                       </div>
                     </td>
                     <td className="text-right">{item.itm_rsp.toFixed(2)}</td>
-                    <td className="text-right">{item.itm_disc}</td>
+                    <td className="text-right">
+                      {item.itm_disc > 0 ? item.itm_disc.toFixed(2) : "-"}
+                    </td>
+                    <td className="text-right">{item.itm_net_price.toFixed(2)}</td>
                     <td className="text-right">{item.itm_amt.toFixed(2)}</td>
                     <td className="text-center">
                       <button
@@ -527,17 +551,17 @@ export default function Sales01() {
               <input type="text" readOnly value={salTotals.sal_qty} />
             </div>
             <div>
-              <label>Gross Amt</label>
+              <label>Total Discount</label>
+              <input type="text" readOnly value={salTotals.sal_disc.toFixed(2)} />
+            </div>
+            <div>
+              <label>Net Amount</label>
               <input
                 type="text"
                 readOnly
-                value={salTotals.sal_amt}
+                value={salTotals.sal_amt.toFixed(2)}
                 className={returnMode ? "negative-total" : ""}
               />
-            </div>
-            <div>
-              <label>Discount</label>
-              <input type="text" readOnly value={salTotals.sal_disc} />
             </div>
             <div>
               <button
