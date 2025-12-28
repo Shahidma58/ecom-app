@@ -17,8 +17,10 @@ interface PageInfo {
 const PAGE_DATA = [
   { name: "Update Account Info ", path: "/pos/accts/acctmgmt" },
   { name: "Update G/L Info", path: "/pos/gen_ledg/glmgmt" },
-  { name: "Update Product Info.", path: "/pos/prods/save_prod" },
-  { name: "Update Products Prices", path: "/pos/prods/upd_prices" },
+  { name: "Update Product Master", path: "/pos/prods/prod_mast" },
+  { name: "Update Products Prices", path: "/pos/prods/upd_prod_prcs" },
+  { name: "Update Prod Discount Info.", path: "/pos/prods/upd_prod_disc" },
+  { name: "Update Prod Other Info.", path: "/pos/prods/upd_prod_info" },
  ];
 
 const App = () => {

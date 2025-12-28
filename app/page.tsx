@@ -7,6 +7,8 @@ export default function HomeRedirect() {
   // Redirects the root path (/) to the desired e-commerce products page.
   // The destination path should be the external URL path, which is /products.
   redirect("/pos/login");
+  // redirect("/pos/dashboard");
+
 }
 // export default function Home() {
 //   return (

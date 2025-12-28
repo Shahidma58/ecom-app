@@ -15,13 +15,14 @@ export default function CheckoutPage() {
   const wCOH = parseInt(gVars.gCOH);
   const gUser = gVars.gUser;
   const to_day = new Date();
-  let wFlag = "C";
+  let wFlag = "D";
   const [drAcDesc, setDrAcDesc] = useState("");
   const [crAcDesc, setCrAcDesc] = useState("");
   //======================================================
   const wTrn_Dt = calc_dayofyear();
   //-=====================================================
   const initForm = {
+    brn_cd: gVars.gBrn_Cd,
     trn_id: 0,
     trn_serl: 0,
     trn_date: to_day,
@@ -49,26 +50,32 @@ export default function CheckoutPage() {
       return;
     }
     const gl_cd = wCOH;
+    const wbrn_cd = gVars.gBrn_Cd;
+console.log(wbrn_cd);
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`/api/pos/fin_tran/get_gl/${gl_cd}`);
+//      const response = await fetch(`/api/pos/fin_tran/get_gl/${gl_cd}`);
+      const response = await fetch(`/api/pos/fin_tran/get_gl/?gl_cd=${gl_cd}&brn_cd=${wbrn_cd}`);
       const data = await response.json();
       console.log(data.data.curr_bal);
       if (!response.ok) {
         throw new Error(data.error || "Failed to fetch Account");
       }
-
-      setForm((prevForm) => ({
-        ...prevForm,
-        drac_curr_bal: data.data.curr_bal,
-      }));
-    //   if (wFlag == "C") {
-    //     setCrAcDesc(data.data.gl_desc);
-    //   } else {
+      if (wFlag == "D") {
+        setForm((prevForm) => ({
+          ...prevForm,
+          drac_curr_bal: data.data.curr_bal,
+        }));
         setDrAcDesc(data.data.gl_desc);
-//      }
-      form.drgl_cd = 0;
+//        form.drgl_cd = 0;
+        } else {
+          setForm((prevForm) => ({
+            ...prevForm,
+            ac_curr_bal: data.data.curr_bal,
+          }));
+          setCrAcDesc(data.data.gl_desc);
+      }
     } catch (error) {
       console.error("Error fetching Account:", error);
       setError(
@@ -198,7 +205,7 @@ export default function CheckoutPage() {
   //=======================================================
   useEffect(() => {
     fetchGenLedg(wCOH);
-    wFlag = "C";
+    wFlag = "D";
     setForm((prevForm) => ({
       ...prevForm,
       drac_no: wCOH,
@@ -302,7 +309,6 @@ export default function CheckoutPage() {
               {/* Input Row */}
               <div className="grid grid-cols-4 gap-2 items-center">
                 {/* Account Input */}
-
                 {/* <div className="w-full">  */}
                 <div className="flex gap-1 w-[150px] border-black-800 items-center">
                   <span className="w-30 ">From:</span>

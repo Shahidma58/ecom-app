@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 
 interface Account {
+  brn_cd: number,
   gl_cd: string;
   gl_desc: string;
   curr_bal: string;
@@ -13,13 +14,19 @@ export default function AccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [brnCode, setBrnCode] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
-
-  // ✅ Fetch accounts on page load
-  useEffect(() => {
+  const params = new URLSearchParams();
     const fetchAccounts = async () => {
+//      console.log('into api...')
       try {
-        const resp = await fetch("/api/pos/gen_ledg/gl_enq");
+//                console.log('into api...-----')
+  if (brnCode) {
+    params.append('brn_cod', brnCode.toString());
+  }
+
+      const resp = await fetch(`/api/pos/gen_ledg/gl_enq?${params.toString()}`);
+//        const resp = await fetch("/api/pos/gen_ledg/gl_enq");
         const data = await resp.json();
 
         if (data.success && Array.isArray(data.data)) {
@@ -34,6 +41,9 @@ export default function AccountsPage() {
       }
     };
 
+  // ✅ Fetch accounts on page load
+
+  useEffect(() => {
     fetchAccounts();
   }, []);
 
@@ -59,11 +69,23 @@ export default function AccountsPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-emerald-700">
-        Accounts Inquiry
+        General Ledgers - Information
       </h2>
 
       {/* 🔍 Search + Filter Controls */}
       <div className="flex flex-wrap items-center gap-4 mb-4">
+        <input
+          type="number"
+          maxLength={3}
+          placeholder="Branch"
+          value={brnCode}
+          onChange={(e) => setBrnCode(e.target.value)}
+          className="flex-1 w-[100px] border border-gray-400 rounded px-3 py-2 text-sm focus:ring-1 focus:ring-emerald-500 outline-none"
+        />
+        <button className="w-25 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-1.5 px-2 rounded-md shadow-md transition-all"
+          onClick={() => fetchAccounts()}>
+          Display
+        </button>
         <input
           type="text"
           placeholder="Search by A/c No or Title..."
@@ -93,6 +115,7 @@ export default function AccountsPage() {
           <table className="min-w-full text-sm border-collapse">
             <thead className="bg-emerald-100 text-emerald-800">
               <tr>
+                <th className="border px-3 py-2 text-left">Brn</th>
                 <th className="border px-3 py-2 text-left">A/c No</th>
                 <th className="border px-3 py-2 text-left">A/c Title</th>
                 <th className="border px-3 py-2 text-right">Curr Bal</th>
@@ -105,6 +128,7 @@ export default function AccountsPage() {
                   key={acc.gl_cd}
                   className="hover:bg-emerald-50 transition-colors"
                 >
+                  <td className="border px-3 py-1">{acc.brn_cd}</td>
                   <td className="border px-3 py-1">{acc.gl_cd}</td>
                   <td className="border px-3 py-1">{acc.gl_desc}</td>
                   <td className="border px-3 py-1 text-right">

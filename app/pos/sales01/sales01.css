@@ -212,17 +212,18 @@
 
 /* Totals Section */
 .sales-totals-card {
-  background: linear-gradient(90deg, #0f766e, #10b981);
+  background: linear-gradient(90deg, #045223, #1f9646);
   color: white;
   border-radius: 0.75rem;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
-  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(34, 75, 36, 0.35);
+  padding: 4px;
   position: sticky;
   bottom: 0;
   margin-top: auto;
   border: none;
   animation: slideUp 0.3s ease-out;
-  font-weight: bold;
+  font-weight:bolder;
+  font-size: larger;
 }
 
 .sales-totals-card input.negative-total {
@@ -245,6 +246,7 @@
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 1.25rem;
+  font-size: larger;
 }
 
 .sales-totals-card label {
@@ -261,14 +263,14 @@
   background-color: rgba(255, 255, 255, 0.95);
   font-weight: 600;
   color: #065f46;
-  font-size: 1rem;
+  font-size: 1.2rem;
   text-align: center;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .sales-btn-save {
-  background: #1e3a8a;
-  color: white;
+  background: #074b0d;
+  color: rgb(251, 252, 252);
   width: 100%;
   padding: 0.6rem 1rem;
   font-size: 1rem;
@@ -281,7 +283,7 @@
 }
 
 .sales-btn-save:hover:not(:disabled) {
-  background: #0f172a;
+  background: #2e4784;
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
 }
@@ -354,7 +356,7 @@
 }
 
 .sales-btn-add:hover {
-  background-color: #15803d;
+  background-color: #25b359;
 }
 
 .sales-btn-save:hover {

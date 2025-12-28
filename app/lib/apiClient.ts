@@ -80,7 +80,8 @@ export async function apiClient(
       });
     } else {
       // Redirect to login if refresh fails
-      window.location.href = "/login";
+//      window.location.href = "/login";
+      window.location.href = "/pos/dashboard/dash01";
     }
   }
 

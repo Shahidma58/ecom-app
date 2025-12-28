@@ -4,11 +4,11 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: NextRequest,
-  context: { params: Promise<{ prod_cd: string }> }
+  context: { params: Promise<{ prd_cd: string }> }
 ) {
   try {
-    const { prod_cd } = await context.params; 
-    const prd_cod = Number(prod_cd);
+    const { prd_cd } = await context.params; 
+    const prd_cod = Number(prd_cd); // prod_cd;  //
     // Validate
     if (!prd_cod) {
       return NextResponse.json(
@@ -24,7 +24,7 @@ export async function GET(
     }
 
     // Prisma query
-    const prodRec = await prisma.prods_Mod.findFirst({
+    const prodRec = await prisma.prod_mast_Mod.findFirst({
       where: {
         prd_cd: prd_cod,
 //        prd_stat: "Active",
@@ -35,8 +35,8 @@ export async function GET(
 
     if (!prodRec) {
       return NextResponse.json(
-        { error: "Product not found or inactive" },
-        { status: 404 }
+        { error: "Product not found..." },
+        { status: 400 }
       );
     }
 

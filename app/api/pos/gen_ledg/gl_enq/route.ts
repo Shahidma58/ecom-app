@@ -5,25 +5,31 @@ import { prisma } from "@/lib/prisma";
 export async function GET(req: NextRequest) {
   try {
     // Read parameter from URL: ?prd_cd=123 (Commented out, but kept for context)
-    // const searchParams = req.nextUrl.searchParams;
-    // const ac_no = searchParams.get("ac_no");
+    const searchParams = req.nextUrl.searchParams;
+    const brn_cd = searchParams.get("brn_cod");
 
-    // if (!ac_no) {
-    //   return NextResponse.json({ error: "Account is required" }, { status: 400 });
-    // }
-
-    // const prdCode = parseInt(ac_no);
-    // if (isNaN(prdCode)) {
-    //   return NextResponse.json({ error: "Account must be a valid number" }, { status: 400 });
-    // }
+    const where: any = {};
+//console.log(brn_cd + "brrrrrrrrrrrrrr");
+    if (brn_cd) {
+      const brnCdNum = Number(brn_cd);
+      if (isNaN(brnCdNum)) {
+        return NextResponse.json(
+          { error: "Invalid branch code" },
+          { status: 400 }
+        );
+      }
+      where.brn_cd = brnCdNum;
+    }
 
     // Prisma query
-    const gls = await prisma.gen_Ledg_Mod.findMany({
+    const gls = await prisma.gen_ledg_bals_vw_Mod.findMany({
       // where: {
       //   ac_no: prdCode
       // },
+      where,
       select: {
         gl_cd: true,
+        brn_cd: true,
         gl_desc: true,
         curr_bal: true,
         gl_stat: true,

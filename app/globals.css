@@ -3,14 +3,18 @@
 
 @layer components {
   /* Define a custom, reusable component class */
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
   .btn-primary1 {
     @apply inline-block px-6 py-2 text-sm font-medium text-white
            bg-blue-600 rounded-md hover:bg-blue-700 
            transition-colors duration-200 shadow-md;
   }
 
-  .btn-primary {@apply bg-pink-500 text-white py-2.5 px-6 rounded-md 
-    font-semibold hover:bg-pink-600 transition-colors }
+  .btn-primary {@apply bg-green-800 text-white py-2.5 px-6 rounded-md 
+    font-semibold hover:bg-green-600 transition-colors }
 /* whilst form is being uploaded */
   .btn-loading {@apply opacity-50 cursor-not-allowed }  
   /* Define a custom class for page containers/layouts */
