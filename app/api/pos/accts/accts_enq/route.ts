@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma"; 
-
 // The entire block of code MUST be wrapped in an exported function.
 export async function GET(req: NextRequest) {
   try {
@@ -37,10 +36,10 @@ export async function GET(req: NextRequest) {
   
     return NextResponse.json({ success: true, data: accts });
   } catch (error) {
-    console.error("Error fetching product:", error);
+    console.error("Error fetching Accounts:", error);
     return NextResponse.json(
       {
-        error: "Failed to fetch product",
+        error: "Failed to fetch Accounts",
         details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }  

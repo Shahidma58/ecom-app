@@ -28,7 +28,7 @@ try {
     // Prisma query
     const account = await prisma.accts_Mod.findFirst({
       where: {
-        ac_no: ac_no,
+        ac_no: parseInt(ac_no),
         ac_stat: "Active",
       },
       select: {

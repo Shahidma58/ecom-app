@@ -22,6 +22,9 @@ model accts_Mod {
   inp_by     String   @db.VarChar
   inp_dt     DateTime @default(now()) @db.Timestamp(6)
 
+  // Relation to gen_ledg_Mod
+  generalLedger gen_ledg_Mod @relation(fields: [ac_gl], references: [gl_cd])
+
   @@map("accounts")
 }
 
@@ -62,7 +65,7 @@ model Fin_Tran_Mod {
   @@map("fin_tran")
 }
 
-model gen_Ledg_Mod {
+model gen_ledg_Mod {
   gl_cd    Decimal   @id @db.Decimal
   gl_desc  String
   gl_sdesc String?
@@ -71,7 +74,8 @@ model gen_Ledg_Mod {
   gl_stat  String
   inp_by   String
   inp_dt   DateTime? @default(now()) @db.Timestamp(6)
-
+  // Relation to accts_Mod
+  accounts   accts_Mod[]
   @@map("gen_ledg")
 }
 
@@ -181,23 +185,6 @@ model products_vw {
   @@map("products")
 }
 
-
-model prod_mast_Mod {
-  prd_cd      Decimal  @id @db.Decimal(15, 0)
-  bar_cd      String   @db.VarChar(20)
-  prd_desc    String   @db.VarChar(35)
-  prd_sku     String   @db.VarChar(5)
-  prd_img_lnk String?  @db.VarChar(50)
-  prd_cat     Int?
-  prd_brand   Int?
-  prd_stat    Boolean
-  inp_by      String   @db.VarChar(15)
-  inp_dt      DateTime @default(now()) @db.Timestamp(6)
-
-  @@index([bar_cd], map: "idx_prod_mast")
-  @@map("prod_mast")
-}
-
 model sales_batch_Mod {
   sal_id    String   @id @db.VarChar(20)
   brn_cd    Int
@@ -279,15 +266,36 @@ model Users_Mod {
   usr_email  String    @db.VarChar
   usr_mbl    String?   @unique @db.VarChar
   pswd_hash  String?   @db.VarChar
-  br_cd     Int
-  role_id     String
+  brn_cd     Int
+  role_id    String
   last_login DateTime? @db.Timestamptz(6)
-  is_active  String?
+  usr_stat   String?
   inp_dt     DateTime  @default(now()) @db.Timestamptz(6)
   inp_by     String?   @db.VarChar
 
   @@map("users")
 }
+
+model prod_mast_Mod {
+  prd_cd      Decimal  @id @db.Decimal(15, 0)
+  bar_cd      String   @db.VarChar(20)
+  prd_desc    String   @db.VarChar(35)
+  prd_sku     String   @db.VarChar(5)
+  prd_img_lnk String?  @db.VarChar(50)
+  prd_cat     Int?
+  prd_brand   Int?
+  prd_stat    Boolean
+  inp_by      String   @db.VarChar(15)
+  inp_dt      DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([bar_cd], map: "idx_prod_mast")
+  @@map("prod_mast")
+}
+
+
+
+
+
 
 model Ec_Cart_Items_Mod {
   prd_cd       Decimal  @db.Decimal

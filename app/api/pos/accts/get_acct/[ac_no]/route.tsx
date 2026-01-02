@@ -37,7 +37,7 @@ export async function GET(
         // curr_bal: true,
       //},
       include: {
-        gen_ledg: {
+        generalLedger: {
           select: { gl_desc: true },
         }
       },

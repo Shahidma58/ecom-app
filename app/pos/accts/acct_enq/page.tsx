@@ -59,7 +59,7 @@ export default function AccountsPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-emerald-700">
-        Accounts Inquiry
+        Accounts Information
       </h2>
 
       {/* 🔍 Search + Filter Controls */}
@@ -117,6 +117,7 @@ export default function AccountsPage() {
                         : "text-red-500"
                     }`}
                   >
+                    {/* {acc.ac_stat ? "Active" : "Inactive"} */}
                     {acc.ac_stat}
                   </td>
                 </tr>

@@ -31,7 +31,7 @@ async function findUserByEmail(email: string): Promise<UserFromDB | null> {
       email: user.usr_email,
       password: user.pswd_hash || "",
       name: user.usr_name,
-      branch_code: user.br_cd
+      branch_code: user.brn_cd,
     };
   } catch (error) {
     console.error("Database query error:", error);

@@ -86,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sessionStorage.removeItem("user");
 
     router.push("/login");
+//    router.push("/pos/dashboard/dash01");
   };
 
   const refreshAccessToken = async (): Promise<string | null> => {
@@ -109,7 +110,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return data.accessToken;
     } catch (error) {
+
       console.error("Token refresh failed:", error);
+    router.push("/pos/dashboard/dash01");
+
       setAccessToken(null);
       setUser(null);
       sessionStorage.removeItem("user");

@@ -18,14 +18,17 @@ export async function POST(req: Request) {
     // Step 1️⃣: Generate new Tran ID using PostgreSQL function
     const wTrn_Dt = tranCr.trn_dt;
     const tranSeqResult: any = await prisma.$queryRawUnsafe(
-      `SELECT get_trn_seq('${wTrn_Dt}', 'FINTR') AS tran_id;`
+      `SELECT get_trn_seq(100, '${wTrn_Dt}', 'FINTR') AS tran_id;`
     );
+// console.log('Tran ID-------');
+// console.log(wTrn_Dt);
+// console.log(tranSeqResult);
 
     let wTran_id = tranSeqResult?.[0]?.tran_id;
-    if (typeof wTran_id === "bigint") wTran_id = Number(wTran_id);
     if (!wTran_id) throw new Error("Failed to generate Tran ID");
+    //if (typeof wTran_id === "bigint") wTran_id = Number(wTran_id);
 
-    tranCr.trn_id = wTran_id;
+    tranCr.trn_id = wTran_id.toString();
     tranCr.trn_serl = 2;
     tranCr.trn_amt = parseFloat(tranCr.trn_amt);
     tranCr.ac_no = Number(tranCr.ac_no);
@@ -52,47 +55,54 @@ export async function POST(req: Request) {
     tranDr.ac_curr_bal =
       parseFloat(tranDr.ac_curr_bal) - parseFloat(tranDr.trn_amt);
 
-    // console.log("tran-Info after DR mapping:", tranDr, tranCr);
-
+    console.log("tran-Info after DR mapping:", tranDr, tranCr);
     // Step 4️⃣: Run all or none transaction
     const result = await prisma.$transaction(async (tx) => {
       // 🔹 Debit Leg
+console.log('Insert Fin Tran leg-Debit');
       const drTran = await tx.fin_Tran_Mod.create({ data: tranDr });
 
       if (Number(tranDr.ac_no) > 99999) {
+console.log('Update Customer Account-Debit');
         // Update Customer Account
         await tx.accts_Mod.update({
           where: { ac_no: Number(tranDr.ac_no) },
           data: { curr_bal: { decrement: tranDr.trn_amt } },
         });
         // Update G/L 
-        await tx.gen_Ledg_Mod.update({
+console.log('Update CUST GL -Debit');
+        await tx.gl_bals_Mod.update({
           where: { gl_cd: Number(tranDr.gl_cd) },
           data: { curr_bal: { decrement: tranDr.trn_amt } },
         });
       } else {
+console.log('Update GL - Debit');
         // Debit Leg only updates G/L
-        await tx.gen_Ledg_Mod.update({
+        await tx.gl_bals_Mod.update({
           where: { gl_cd: Number(tranDr.ac_no) },
           data: { curr_bal: { decrement: tranDr.trn_amt } },
         });
       }
       // 🔹 Credit Leg
+console.log('Insert Fin Tran leg-Credit');
       const crTran = await tx.fin_Tran_Mod.create({ data: tranCr });
       if (Number(tranCr.ac_no) > 99999) {
+console.log('Update Customer Account-Credit');
         // Update Customer Account
         await tx.accts_Mod.update({
           where: { ac_no: Number(tranCr.ac_no) },
           data: { curr_bal: { increment: tranCr.trn_amt } },
         });
+console.log('Update Cust GL - Credit');
         // Update Customer G/L
-        await tx.gen_Ledg_Mod.update({
+        await tx.gl_bals_Mod.update({
           where: { gl_cd: Number(tranCr.gl_cd) },
           data: { curr_bal: { increment: tranCr.trn_amt } },
         });
       } else {
+console.log('Update GEN LEDG -Credit');
         // Credit Leg only updates G/L
-        await tx.gen_Ledg_Mod.update({
+        await tx.gl_bals_Mod.update({
           where: { gl_cd: Number(tranCr.ac_no) },
           data: { curr_bal: { increment: tranCr.trn_amt } },
         });

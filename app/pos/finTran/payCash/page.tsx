@@ -20,6 +20,7 @@ export default function CheckoutPage() {
   const wTrn_Dt = calc_dayofyear();
   //-=====================================================
   const initForm = {    trn_id: 0,
+    brn_cd: gVars.gBrn_Cd,
     trn_serl: 0,
     trn_date: to_day,
     trn_dt: wTrn_Dt,
@@ -46,11 +47,15 @@ export default function CheckoutPage() {
       return;
     }
     const gl_cd = wCOH;
+    const wbrn_cd = gVars.gBrn_Cd;
+console.log(wbrn_cd);
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`/api/pos/fin_tran/get_gl/${gl_cd}`);
+      const response = await fetch(`/api/pos/fin_tran/get_gl/?gl_cd=${gl_cd}&brn_cd=${wbrn_cd}`);
       const data = await response.json();
+console.log(data.data);
+
 console.log(data.data.curr_bal);
       if (!response.ok) {
         throw new Error(data.error || "Failed to fetch Account");
@@ -125,6 +130,7 @@ console.log(data.data.curr_bal);
   };
   //================== POST TRANSACTIONS =========================
   const handleSaveTran = async () => {
+    console.log(form);
     let err = "";
     if (form.ac_no < 100000 && form.gl_cd > 0) {
       err = "Invalid Cr-GL Code initialized"
@@ -135,17 +141,16 @@ console.log(data.data.curr_bal);
     if (form.drac_no < 100000 && form.drgl_cd > 0) {
       err = "Invalid Dr-GL Code initialized"
     } 
-    if (form.drac_no > 99 && form.drgl_cd == 0) {
+    if (form.drac_no > 99999 && form.drgl_cd == 0) {
       err = "Invalid Dr-GL Code initialized"
     } 
     if (err != "") {
-      alert('Err: Invalid Data being Sent');
+      alert('Err: Invalid Data being Sent....');
       return;
     }
     try {
       setLoading(true);
       setError(null);
-
       const tranPayload = {
 //        tranDbt: tran2,
         tranCr: form,

@@ -17,12 +17,14 @@ interface PageInfo {
 const PAGE_DATA = [
   { name: "Daily Stats", path: "/pos/dashboard" },
   { name: "Key Metrics", path: "/pos/dashboard/dash01" },
+  { name: "Display G/Ls", path: "/pos/gen_ledg/gl_enq" },
+  { name: "Display Accounts", path: "/pos/accts/acct_enq" },
+  { name: "Display Products", path: "/pos/prods/prod_enq" },
   { name: "Account & G/L Statement", path: "/pos/accts/stmt" },
-  { name: "General Ledgers", path: "/pos/gen_ledg/gl_enq" },
   { name: "Product/GL Maintenance", path: "/menu02" },
   { name: "Pay Cash", path: "/pos/finTran/payCash" },
   { name: "Recieve Cash", path: "/pos/finTran/rcvCash" },
-  { name: "Account to Account", path: "/pos/finTran/rcvCash1" },
+  { name: "Account to Account", path: "/pos/finTran/acctToAcct" },
   { name: "Counter Sales", path: "/pos/sales01" },
   { name: "Purchases", path: "/pos/purch01" }
  ];
