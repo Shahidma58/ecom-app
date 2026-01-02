@@ -28,6 +28,8 @@ export async function POST(request: NextRequest) {
     const tokenPayload = {
       userId: payload.userId,
       email: payload.email,
+      branch_code: payload.branch_code,
+      username: payload.username
     };
     const newAccessToken = generateAccessToken(tokenPayload);
     const newRefreshToken = generateRefreshToken(tokenPayload);

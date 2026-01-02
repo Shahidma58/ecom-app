@@ -6,254 +6,455 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-// datasource db {
-//   provider = "sqlite"
-//   url      = env("DATABASE_URL")
-// }
-//============================================
-// model Definitions
-//===================== Users ====================
-model Users_Mod {
-  usr_id     String    @unique @db.VarChar
-  usr_name   String    @db.VarChar
-  usr_email  String    @db.VarChar
-  usr_mbl    String?   @unique @db.VarChar
-  inp_dt     DateTime  @default(now()) @db.Timestamptz
-  pswd_hash  String?   @db.VarChar
-  last_login DateTime? @db.Timestamptz
-  is_active  Boolean?
-  inp_by     String?   @db.VarChar
 
-  @@map("users") // maps this Prisma model to the existing 'users' table
+model accts_Mod {
+  ac_no      Decimal  @id @db.Decimal(8, 0)
+  old_ac_no  String   @db.VarChar(8)
+  ac_gl      Decimal  @db.Decimal(5, 0)
+  ac_title   String   @db.VarChar(35)
+  ac_contact String   @db.VarChar(35)
+  ac_addr    String   @db.VarChar(35)
+  nt_no      String?  @db.VarChar(15)
+  gst_no     String?  @db.VarChar(15)
+  curr_bal   Decimal  @db.Decimal(12, 2)
+  yy_op_bal  Decimal  @db.Decimal(12, 2)
+  ac_stat    String?  @db.VarChar(15)
+  inp_by     String   @db.VarChar
+  inp_dt     DateTime @default(now()) @db.Timestamp(6)
+
+  @@map("accounts")
 }
 
+model brands_Mod {
+  brand_code Int
+  brand_name String   @id @db.VarChar(25)
+  logo_lnk   String?  @db.VarChar
+  inp_by     String?  @db.VarChar
+  inp_dt     DateTime @default(now()) @db.Timestamptz(6)
 
-//===================================================
-// // Example model for posts
-model Posts_Mod {
-  post_id     Int       @unique @id
-  main_title  String
-  sub_title   String?
-  post_detl   String?
+  @@map("brands")
+}
+
+model faqs_Mod {
+  id        BigInt @id @default(autoincrement())
+  ques_chun String @db.VarChar
+  ans_wer   String @db.VarChar
+
+  @@map("faqs")
+}
+
+model Fin_Tran_Mod {
+  trn_id      String   @db.VarChar(20)
+  trn_serl    Int
+  brn_cd      Int
+  ac_no       Decimal  @db.Decimal(12, 0)
+  trn_desc    String
+  dr_cr       String   @db.VarChar
+  trn_amt     Decimal  @db.Decimal(12, 2)
+  trn_flag    String
   inp_by      String
-//  inp_dt  DateTime  @default(now())
-  
-  @@map("mn_posts")
+  inp_dt      DateTime @default(now()) @db.Timestamp(6)
+  trn_date    DateTime @db.Date
+  gl_cd       Decimal? @db.Decimal(5, 0)
+  ac_curr_bal Decimal  @db.Decimal(12, 2)
+
+  @@id([trn_id, trn_serl])
+  @@map("fin_tran")
 }
 
-model SubPosts_Mod {
-  sub_id    Int
-  post_id   Int
-  sub_detl  String
-//  inp_dt    DateTime @default(now())
-//  inp_by    String?
+model gen_Ledg_Mod {
+  gl_cd    Decimal   @id @db.Decimal
+  gl_desc  String
+  gl_sdesc String?
+  gl_cat   String
+  gl_type  String    @db.VarChar
+  gl_stat  String
+  inp_by   String
+  inp_dt   DateTime? @default(now()) @db.Timestamp(6)
 
-  // Relation example (uncomment if Posts_Mod exists)
-  // post     Posts_Mod @relation(fields: [post_id], references: [post_id])
-
-  @@id([sub_id, post_id])          // ✅ composite primary key
-  @@map("mn_sub_posts")            // ✅ maps to your actual table name
+  @@map("gen_ledg")
 }
 
-// schema.prisma
+model gl_bals_Mod {
+  gl_cd     Decimal   @id @db.Decimal(5, 0)
+  brn_cd    Decimal   @db.Decimal(3, 0)
+  yy_op_bal Decimal   @db.Decimal(15, 2)
+  curr_bal  Decimal   @db.Decimal(15, 2)
+  inp_by    String
+  inp_dt    DateTime? @default(now()) @db.Timestamp(6)
 
-// model Prods_Mod {
-//   // Primary Key
-//   prd_cd       Int      @id @map("prd_cd") @db.Integer // Converted numeric (likely integer PK) to Int
-  
-//   // Required Fields
-//   bar_cd       String   @unique @map("bar_cd") @db.VarChar(255) // Assumed a unique identifier for a barcode
-//   prd_desc     String   @map("prd_desc") @db.VarChar(255)
-//   inp_by       String   @map("inp_by") @db.VarChar(255)
-//   prd_sku      String   @map("prd_sku") @db.Text
-//   prd_qoh      Float    @map("prd_qoh") @db.DoublePrecision // Converted numeric to Float
-//   prd_re_ord   Float    @map("prd_re_ord") @db.DoublePrecision // Converted numeric to Float
-//   prd_cat      String   @map("prd_cat") @db.VarChar(255)
-  
-//   // Optional/Nullable Fields
-//   prd_img_lnk  String?  @map("prd_img_lnk") @db.VarChar(255)
-//   prd_brand    String?  @map("prd_brand") @db.VarChar(255)
-//   max_rsp      Float?   @map("max_rsp") @db.DoublePrecision // Converted numeric to Float?
-//   min_rsp      Float?   @map("min_rsp") @db.DoublePrecision // Converted numeric to Float?
-//   tax_amt      Float?   @map("tax_amt") @db.DoublePrecision // Converted numeric to Float?
-//   pur_prc      Float?   @map("pur_prc") @db.DoublePrecision // Converted numeric to Float?
-//   disc_amt     Float?   @map("disc_amt") @db.DoublePrecision // Converted numeric to Float?
-//   disc_st_dt   Float?   @map("disc_st_dt") @db.DoublePrecision // Converted numeric to Float? (Check actual type)
-//   disc_end_dt  Float?   @map("disc_end_dt") @db.DoublePrecision // Converted numeric to Float? (Check actual type)
-//   exp_dt       DateTime? @map("exp_dt") @db.Date
-//   prd_lot_ref  String?  @map("prd_lot_ref") @db.VarChar(255)
-//   prd_status   String?  @map("prd_status") @db.VarChar(255)
-//   disc_pct     BigInt?  @map("disc_pct") @db.Integer
-//   max_pur_qty  BigInt?  @map("max_pur_qty") @db.Integer
-//   prd_stat     String?  @map("prd_stat") @db.Text
-// //  created_at   DateTime @default(now()) @map("created_at") @db.TimestampWithoutTimeZone(0)
+  @@map("gl_bals")
+}
 
-//   @@map("products") // Maps the Prisma model name Prods_Mod to the actual table name products
-// }
+model gl_bals_hist_Mod {
+  gl_cd       Decimal  @db.Decimal(5, 0)
+  brn_cd      Decimal  @db.Decimal(3, 0)
+  trn_dt      DateTime @db.Date
+  curr_bal    Decimal  @db.Decimal(15, 2)
+  today_mvmnt Decimal  @db.Decimal(15, 2)
 
-model Prods_Mod {
-  prd_cd    Int @id
-  prd_desc     String
-  prd_sku      String
-  prd_qoh      Int
-  prd_re_ord   Int
-  prd_img_lnk  String?
-  prd_cat      String
-  prd_brand    String?
-  max_rsp      Decimal?
-  min_rsp      Decimal?
-  tax_amt      Decimal?
-  pur_prc      Decimal?
-  disc_amt     Decimal?
-  disc_st_dt   DateTime?
-  disc_end_dt  DateTime?
-  exp_dt       DateTime?
-  prd_lot_ref  String?
-  prd_stat     String?
-  disc_pct     Int?
-  max_pur_qty  Int?
-  inp_by       String
-  created_at   DateTime   @default(now())
+  @@id([gl_cd, brn_cd, trn_dt])
+  @@map("gl_bals_hist")
+}
 
+//======================  GL Views ==================
+model gen_ledg_bals_vw_Mod {
+  brn_cd     Int
+  gl_cd      Int
+  gl_desc    String
+  gl_stat    String
+  yy_op_bal  Decimal   @db.Decimal(15, 2)
+  curr_bal   Decimal   @db.Decimal(15, 2)
+  inp_by     String
+  inp_dt     DateTime
+
+  @@id([brn_cd, gl_cd])
+  @@map("gen_ledg_bals_vw")
+}
+
+model prod_categ_Mod {
+  cat_cd   String   @id @db.VarChar
+  cat_desc String   @db.VarChar
+  inp_by   String   @db.VarChar
+  inp_dt   DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("prod_categ")
+}
+
+model prod_info_Mod {
+  prd_cd      Decimal   @id @db.Decimal(15, 0)
+  brn_cd      Int
+  prd_qoh     BigInt
+  prd_re_ord  BigInt
+  max_rsp     Decimal   @db.Decimal(12, 0)
+  min_rsp     Decimal   @db.Decimal(12, 0)
+  tax_pct     Int?
+  pur_prc     Decimal   @db.Decimal(12, 2)
+  exp_dt      DateTime? @db.Date
+  disc_amt    BigInt?
+  disc_pct    Int?
+  disc_st_dt  DateTime? @db.Date
+  disc_end_dt DateTime? @db.Date
+  prd_lot_ref String?   @db.VarChar
+  max_pur_qty Int?
+  inp_by      String    @db.VarChar
+  inp_dt      DateTime  @default(now()) @db.Timestamp(6)
+
+  @@map("prod_info")
+}
+
+/// READ-ONLY VIEW
+model products_vw {
+  brn_cd      Int
+  prd_cd      Decimal  @db.Decimal(15, 0)
+
+  bar_cd      String   @db.VarChar(20)
+  prd_desc    String   @db.VarChar(35)
+  prd_sku     String   @db.VarChar(5)
+  prd_img_lnk String?  @db.VarChar(50)
+
+  prd_cat     Int?
+  prd_brand   Int?
+
+  max_rsp     Decimal  @db.Decimal(12, 0)
+  min_rsp     Decimal  @db.Decimal(12, 0)
+  tax_pct     Int?
+
+  pur_prc     Decimal  @db.Decimal(12, 2)
+
+  prd_qoh     BigInt
+  prd_re_ord  BigInt
+
+  disc_amt    BigInt?
+  disc_pct    Int?
+
+  disc_st_dt  DateTime? @db.Date
+  disc_end_dt DateTime? @db.Date
+  exp_dt      DateTime? @db.Date
+
+  prd_stat    Boolean
+
+  inp_by      String   @db.VarChar(15)
+  inp_dt      DateTime @db.Timestamp(6)
+
+  @@id([brn_cd, prd_cd])
   @@map("products")
 }
 
 
+model prod_mast_Mod {
+  prd_cd      Decimal  @id @db.Decimal(15, 0)
+  bar_cd      String   @db.VarChar(20)
+  prd_desc    String   @db.VarChar(35)
+  prd_sku     String   @db.VarChar(5)
+  prd_img_lnk String?  @db.VarChar(50)
+  prd_cat     Int?
+  prd_brand   Int?
+  prd_stat    Boolean
+  inp_by      String   @db.VarChar(15)
+  inp_dt      DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([bar_cd], map: "idx_prod_mast")
+  @@map("prod_mast")
+}
+
+model sales_batch_Mod {
+  sal_id    String   @id @db.VarChar(20)
+  brn_cd    Int
+  sal_dt    DateTime @db.Date
+  sal_mbl   Decimal? @db.Decimal(15, 0)
+  sal_amt   Decimal  @db.Decimal(12, 2)
+  sal_items Decimal  @db.Decimal(12, 2)
+  sal_qty   Decimal  @db.Decimal(12, 2)
+  inp_by    String   @db.VarChar
+  inp_dt    DateTime @default(now()) @db.Timestamptz(6)
+  sal_disc  Decimal  @db.Decimal(12, 2)
+
+  @@map("sales_batch")
+}
+
+model sales_batch_hist_Mod {
+  sal_id    String   @id @db.VarChar(20)
+  sal_dt    DateTime @db.Date
+  sal_mbl   Decimal? @db.Decimal(15, 0)
+  brn_cd    Int
+  sal_amt   Decimal  @db.Decimal(12, 2)
+  sal_items Decimal  @db.Decimal(12, 2)
+  sal_qty   Decimal  @db.Decimal(12, 2)
+  inp_by    String   @db.VarChar
+  inp_dt    DateTime @default(now()) @db.Timestamptz(6)
+  sal_disc  Decimal  @db.Decimal(12, 2)
+
+  @@map("sales_batch_hist")
+}
+
+model sales_detl_Mod {
+  sal_id   String   @db.VarChar(20)
+  itm_cd   Decimal  @db.Decimal
+  itm_desc String   @db.VarChar(35)
+  itm_qty  Decimal  @db.Decimal(18, 2)
+  itm_rsp  Decimal  @db.Decimal(18, 2)
+  itm_disc Decimal  @db.Decimal(18, 2)
+  itm_tax  Decimal  @db.Decimal(18, 2)
+  itm_amt  Decimal  @db.Decimal(18, 2)
+  itm_stat String   @db.Char(1)
+  itm_cost Decimal? @db.Decimal(18, 2)
+  inp_dt   DateTime @default(now()) @db.Timestamptz(6)
+
+  @@id([sal_id, itm_cd], map: "sales_tran_pkey")
+  @@map("sales_detl")
+}
+
+model sales_detl_hist_Mod {
+  sal_id   String   @db.VarChar(20)
+  itm_cd   Decimal  @db.Decimal
+  itm_desc String   @db.VarChar(35)
+  itm_qty  Decimal  @db.Decimal(18, 2)
+  itm_rsp  Decimal  @db.Decimal(18, 2)
+  itm_disc Decimal  @db.Decimal(18, 2)
+  itm_tax  Decimal  @db.Decimal(18, 2)
+  itm_amt  Decimal  @db.Decimal(18, 2)
+  itm_stat String   @db.Char(1)
+  itm_cost Decimal? @db.Decimal(18, 2)
+  inp_dt   DateTime @default(now()) @db.Timestamptz(6)
+
+  @@id([sal_id, itm_cd], map: "sales_tran_hist_pkey")
+  @@map("sales_detl_hist")
+}
+
+model tran_seq_Mod {
+  trn_dt  Decimal  @db.Decimal
+  brn_cd  Decimal  @db.Decimal(3, 0)
+  trn_seq Decimal  @db.Decimal
+  inp_dt  DateTime @default(now()) @db.Timestamptz(6)
+  mod_id  String
+
+  @@id([trn_dt, mod_id, brn_cd])
+  @@map("tran_seq")
+}
+
+model Users_Mod {
+  usr_id     String    @id @db.VarChar
+  usr_name   String    @db.VarChar
+  usr_email  String    @db.VarChar
+  usr_mbl    String?   @unique @db.VarChar
+  pswd_hash  String?   @db.VarChar
+  br_cd     Int
+  role_id     String
+  last_login DateTime? @db.Timestamptz(6)
+  is_active  String?
+  inp_dt     DateTime  @default(now()) @db.Timestamptz(6)
+  inp_by     String?   @db.VarChar
+
+  @@map("users")
+}
+
 model Ec_Cart_Items_Mod {
-  cart_id      Int
-  cart_id_serl Int
-  prd_cd       Int
-  prd_img_lnk  String
-  prd_desc     String
-  prd_qty      Int
-  prd_rsp      Decimal  
-  tot_amt      Decimal
-  tax_amt      Decimal
-  inp_dt       DateTime  @default(now()) @db.Timestamptz
+  prd_cd       Decimal  @db.Decimal
+  prd_qty      Decimal  @db.Decimal
+  prd_rsp      Decimal  @db.Decimal
+  prd_img_lnk  String   @db.VarChar
+  prd_desc     String   @db.VarChar
+  tot_amt      Decimal  @db.Decimal
+  inp_dt       DateTime @default(now()) @db.Timestamptz(6)
+  cart_id      Decimal  @db.Decimal
+  cart_id_serl Decimal  @db.Decimal
+  tax_amt      Decimal? @db.Decimal
 
   @@id([cart_id, cart_id_serl])
   @@map("ec_cart_items")
 }
 
 model Ec_Carts_Mod {
-  cart_id    Int   
-  cust_mbl   String
-  cust_email String?   
-  cust_fname String
-  cust_lname String
-  cust_addr_1 String
-  cust_addr_2 String
-  cust_city   String
-  cust_ctry   String
-  cust_comp   String?
-  tot_tax     Decimal   
-  tot_itms    Int
-  dlvy_chgs   Decimal   
-  tot_amt     Decimal   
-  cart_stat   String
-  inp_dt     DateTime  @default(now()) @db.Timestamptz
-  inp_by      String
+  cust_mbl    String   @db.VarChar
+  cart_id     Decimal  @db.Decimal
+  cust_email  String?  @db.VarChar
+  cust_fname  String   @db.VarChar
+  cust_lname  String   @db.VarChar
+  cust_addr_1 String   @db.VarChar
+  cust_addr_2 String   @db.VarChar
+  cust_city   String   @db.VarChar
+  cust_ctry   String   @db.VarChar
+  tot_amt     Decimal  @db.Decimal
+  tot_tax     Decimal  @db.Decimal
+  tot_itms    BigInt
+  cart_stat   String   @db.VarChar
+  inp_dt      DateTime @default(now()) @db.Timestamptz(6)
+  dlvy_chgs   Decimal  @db.Decimal
+  cust_comp   String?  @db.VarChar
+  inp_by      String   @db.VarChar
 
   @@id([cust_mbl, cart_id])
   @@map("ec_carts")
 }
 
-model Sales_Batch_Mod {
-  sal_id    BigInt @id
-  sal_dt    DateTime
-  sal_amt   Decimal
-  sal_items BigInt
-  sal_qty   BigInt
-  sal_disc  BigInt
-  inp_by    String
-  inp_dt    DateTime  @default(now()) @db.Timestamptz
-  @@map("sales_batch")
+model app_info {
+  app_name  String   @id @db.VarChar
+  app_cat   String   @db.VarChar
+  disp_seq  BigInt
+  app_type  String?  @db.VarChar
+  app_title String   @db.VarChar
+  app_color String   @db.VarChar
+  app_link  String?  @db.VarChar
+  app_desc  String   @db.VarChar
+  app_img   String?  @db.VarChar
+  inp_by    String?  @db.VarChar
+  inp_dt    DateTime @default(now()) @db.Timestamptz(6)
 }
 
-model Sales_Tran_Mod {
-  sal_id      Int   
-  itm_cd      BigInt   
-  itm_desc    String
-  itm_qty     Decimal   
-  itm_rsp     Decimal   
-  itm_tax     Decimal   
-  itm_amt     Decimal   
-  itm_stat    String
-  itm_cost    Decimal?  
-  itm_disc    Decimal 
-  @@id([sal_id, itm_cd]) // composite primary key
-  @@map("sales_tran")         // maps to the existing PostgreSQL table
+model app_params {
+  id         BigInt    @id @default(autoincrement())
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  expire_at  DateTime? @db.Timestamp(6)
+  msg        String?
 }
-//	FROM public.fin_tran;
 
-model Fin_Tran_Mod {
-  trn_id      Int
-  trn_serl    Int
-  trn_date    DateTime
-  ac_no       Int
-  gl_cd       Int
-  trn_desc    String
-  dr_cr       String  
-  trn_amt     Decimal
-  trn_flag    String
-  ac_curr_bal Decimal
+model app_prods {
+  img_lnk    String   @db.VarChar
+  img_text   String   @db.VarChar
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  id         BigInt   @id @default(autoincrement())
+  ban_id     String?  @db.VarChar
+  img_text_1 String?  @db.VarChar
+  prd_cat    String?  @db.VarChar
+}
+
+model cart_seq {
+  cart_dt    Decimal  @id @db.Decimal
+  cart_no    Decimal  @db.Decimal
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model gl_bals_hiswrk {
+  gl_cd       Decimal?  @db.Decimal(5, 0)
+  brn_cd      Decimal?  @db.Decimal(3, 0)
+  buss_dt     DateTime? @db.Date
+  curr_bal    Decimal?  @db.Decimal(15, 2)
+  today_mvmnt Decimal?  @db.Decimal(15, 2)
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model mig_brands {
+  brnd_code String? @db.VarChar(20)
+  brnd_name String? @db.VarChar(35)
+  new_code  BigInt?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+
+model purch_batch {
+  pur_id   Decimal   @id @db.Decimal
+  brn_cd   Int
+  vnd_id   String
+  tot_itms Int
+  tot_qty  Int
+  tot_amt  Decimal   @db.Decimal
+  amt_paid Decimal?  @db.Decimal
+  amt_cr   Decimal?  @db.Decimal
+  inp_by   String
+  inp_dt   DateTime  @default(now()) @db.Timestamp(6)
+  pur_dt   DateTime? @default(now()) @db.Date
+}
+
+model purch_detl {
+  pur_id      Decimal   @db.Decimal(14, 0)
+  pur_id_serl Int
+  prd_cd      Decimal   @db.Decimal(7, 0)
+  brn_cd      Decimal   @db.Decimal(3, 0)
+  prd_desc    String
+  pur_qty     Decimal   @db.Decimal(12, 0)
+  pur_prc     Decimal   @db.Decimal(12, 2)
+  new_rsp     Decimal?  @db.Decimal(12, 2)
+  cur_rsp     Decimal   @db.Decimal(12, 2)
+  cur_pur_prc Decimal?  @db.Decimal(12, 2)
+  pur_dt      DateTime? @default(now()) @db.Date
+  itm_tot_amt Decimal?  @db.Decimal(12, 2)
+  tax_amt     Decimal?  @db.Decimal(12, 2)
   inp_by      String
-  inp_dt      DateTime  @default(now()) @db.Timestamptz
-  @@id([trn_id, trn_serl])
-  @@map("fin_tran")
+  inp_dt      DateTime? @default(now()) @db.Timestamp(6)
+
+  @@id([pur_id, pur_id_serl])
 }
 
-// Prisma Schema for gen_ledg table
-// File: prisma/schema.prisma
-
-model gen_Ledg_Mod {
-  gl_cd      Int      @id
-  gl_desc    String   
-  gl_sdesc   String?  
-  gl_cat     String   
-  gl_type    String   
-  yy_op_bal  Decimal  
-  curr_bal   Decimal  
-  gl_stat    String   
-  inp_by     String   
-  inp_dt     DateTime @default(now()) @db.Timestamp(6)
-
-  @@map("gen_ledg")
-
-  // ✅ Define the back relation
-  accts      accts_Mod[]
+model sales_info {
+  prd_cd      Decimal   @id(map: "prod_priices_pkey") @db.Decimal
+  max_rsp     Decimal   @db.Decimal
+  tax_amt     Decimal   @db.Decimal
+  disc_amt    Decimal   @db.Decimal
+  net_rsp     Decimal   @db.Decimal
+  inp_by      String    @db.VarChar
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  disc_st_dt  DateTime? @db.Date
+  disc_end_dt DateTime? @db.Date
+  avg_pur_prc Decimal?  @db.Decimal
+  qoh         Decimal?  @db.Decimal
+  pur_qty     Decimal?  @db.Decimal
+  new_pur_prc Decimal?  @db.Decimal
+  min_rsp     Decimal?  @db.Decimal
+  cur_avg_pp  Decimal?  @db.Decimal
 }
 
-model accts_Mod {
-  ac_no      Int   @id  // PK
-  ac_gl      Int
-  ac_title   String
-  ac_contact String
-  ac_addr    String
-  curr_bal   Decimal
-  yy_op_bal  Decimal
-  ac_stat    String
-  inp_by     String
-  inp_dt     DateTime  @default(now())
+model user_apps {
+  Usr_Id      String   @db.VarChar
+  App_Name    String   @db.VarChar
+  Last_Upd_By String   @db.VarChar
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
 
-  @@map("accounts") 
-  // ✅ Define relation to gen_ledg_Mod
-  gen_ledg   gen_Ledg_Mod? @relation(fields: [ac_gl], references: [gl_cd])
+  @@id([Usr_Id, App_Name])
 }
 
-model brands_Mod {
-  brand_name String   @id @db.VarChar(25)
-  logo_lnk   String? @db.VarChar(64)
-  manuf_by   String? @db.VarChar(35)
-  inp_by     String @db.VarChar(15)
-  inp_dt     DateTime  @default(now())
-  @@map("brands")
-}
-
-model prod_categ_Mod {
-  cat_cd     String   @id @db.VarChar(15)
-  cat_desc   String?  @db.VarChar(30)
-  inp_by     String   @db.VarChar(15)
-  inp_dt     DateTime @default(now())
-  @@map("prod_categ")
+model user_pswd {
+  usr_id       String   @id @db.VarChar
+  pswd_chng_dt DateTime @db.Timestamp(6)
+  pswd_tries   Int      @db.SmallInt
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  usr_pswd     Decimal? @db.Decimal
 }

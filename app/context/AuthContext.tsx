@@ -14,6 +14,7 @@ interface User {
   id: string;
   email: string;
   name: string;
+  branch_code: number
 }
 
 interface AuthContextType {
