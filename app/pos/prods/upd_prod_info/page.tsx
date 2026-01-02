@@ -65,7 +65,6 @@ export default function UpdateInfo() {
       max_rsp: ""
     });
     setPrdCat('');
-    //setPrdMaxPrc('');
     setPrdDesc('');
   };
 
@@ -87,19 +86,12 @@ export default function UpdateInfo() {
         setPrdDesc(mast.data.prd_desc || "");
         setPrdCat(mast.data.prd_cat || "");
         setPrdCd(mast.data.prd_cd || "");
-    // } catch (err: any) {
-    //   alert(err.message);
-    // }
-    // try {
-    //api/pos/prods/get_prod_info?prd_cd=901
-
-    console.log('prod code ');
-    console.log(wPrdCd);
-    console.log('prod code ');
+    // console.log('prod code ');
+    // console.log(wPrdCd);
+    // console.log('prod code ');
       const resp = await fetch(`/api/pos/prods/get_prod_info?prd_cd=${wPrdCd}`);
       if (!resp.ok) throw new Error("Prices Record not found");
       const info = await resp.json();
-//      setPrdMaxPrc(info.data.max_rsp || "");
       console.log(info);
       console.log('info');
       setForm({
@@ -218,8 +210,8 @@ export default function UpdateInfo() {
                     <input
                       type="number"
                       name="max_rsp"
-                    //   value={form.max_rsp}
-                      value={form.prd_cd}
+                      value={form.max_rsp}
+                      //value={form.prd_cd}
                       disabled
                       className="border border-black rounded px-3 py-2 text-sm w-32 bg-gray-100"
                     />
@@ -273,23 +265,9 @@ export default function UpdateInfo() {
                     value={form.exp_dt ? new Date(form.exp_dt).toISOString().split('T')[0] : ""}
                     onChange={handleChange}
                     className="border border-black rounded px-3 py-2 text-sm w-32"
-                    disabled
                   />
                 </div>
-                {/* <div className={"mr-10"}>
-                  Disc End Dt:<span className="text-red-500">*</span>
-                </div>
-                <div>
-                  <input
-                    type="date"
-                    name="disc_end_dt"
-                    value={form.disc_end_dt? new Date(form.disc_end_dt).toISOString().split('T')[0] : ""}
-                    onChange={handleChange}
-                    className="border border-black rounded px-3 py-2 text-sm w-32"
-                  />
-                </div> */}
-              </div> {/* --==============  end of 4 col grid ========== */}
-
+              </div>
               {/* //=========== Buttons ============== */}
               <div className="grid grid-cols-[2fr_3fr_5fr] gap-2 items-center">
                 <div>

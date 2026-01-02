@@ -115,7 +115,10 @@ export default function AccountForm() {
   };
 
   return (
-    <div className="min-h-screen max-w-4xl bg-linear-to-br from-green-50 via-emerald-50 to-teal-50 py-8 px-4 justify-items-center">
+    <div 
+    // className="min-h-screen max-w-4xl bg-linear-to-br from-green-50 via-emerald-50 to-teal-50 py-2 px-1 justify-items-center"
+    className="min-h-screen max-w-4xl py-2 px-1 justify-items-center"
+    >
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div
@@ -124,34 +127,16 @@ export default function AccountForm() {
             background: "linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)",
           }}
         >
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-2xl font-bold text-white mb-1">
             Account Management
           </h1>
-          {/* <p className="text-green-100 text-sm">
-            Create new accounts or update existing ones
-          </p> */}
         </div>
 
-        {/* Message Alert */}
-        {message && (
-          <div
-            className={`mb-6 rounded-lg px-6 py-4 shadow-sm border-l-4 ${
-              message.includes("✓")
-                ? "bg-green-50 border-green-500 text-green-800"
-                : message.includes("→")
-                ? "bg-blue-50 border-blue-500 text-blue-800"
-                : "bg-yellow-50 border-yellow-500 text-yellow-800"
-            }`}
-          >
-            <p className="font-medium">{message}</p>
-          </div>
-        )}
-
         {/* Form Card */}
-        <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="bg-white rounded-xl shadow-lg pb-8 pt-2 border border-gray-200">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
             {/* Account Number & Title Row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <div>
                 <label className={`labelClass`}>
                   Account No <span className="text-red-500">*</span>
@@ -194,7 +179,7 @@ export default function AccountForm() {
             </div>
 
             {/* GL Code & Description Row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <div>
                 <label className={`labelClass`}>
                   GL Code <span className="text-red-500">*</span>
@@ -219,15 +204,35 @@ export default function AccountForm() {
                 <input
                   type="text"
                   value={glDesc}
-                  className="w-full border border-black rounded-lg px-4 py-2.5 text-sm bg-gray-100 text-gray-600 focus:outline-none"
+                  className="inputClass"
+                  // className="w-full border border-black rounded-lg px-4 py-2.5 text-sm bg-gray-100 text-gray-600 focus:outline-none"
                   placeholder="GL Description"
                   disabled
                 />
               </div>
             </div>
+            {/* Address */}
+            <div>
+              <label className={`labelClass`}>
+                Address <span className="text-red-500">*</span>
+              </label>
+              <input maxLength={64}
+                {...register("ac_addr")}
+                className={`inputClass resize-y ${
+                  errors.ac_addr ? inputErrorClass : ""
+                }`}
+                placeholder="Enter complete address"
+              />
+              {errors.ac_addr && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.ac_addr?.message}
+                </p>
+              )}
+            </div>
+
 
             {/* Contact & Status Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <div>
                 <label className={`labelClass`}>
                   Contact <span className="text-red-500">*</span>
@@ -267,29 +272,6 @@ export default function AccountForm() {
                   </p>
                 )}
               </div>
-            </div>
-
-            {/* Address */}
-            <div>
-              <label className={`labelClass`}>
-                Address <span className="text-red-500">*</span>
-              </label>
-              <input maxLength={64}
-                {...register("ac_addr")}
-                className={`inputClass min-h-[50px] resize-y ${
-                  errors.ac_addr ? inputErrorClass : ""
-                }`}
-                placeholder="Enter complete address"
-              />
-              {errors.ac_addr && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.ac_addr?.message}
-                </p>
-              )}
-            </div>
-
-            {/* Balance Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className={`labelClass`}>
                   Current Balance <span className="text-red-500">*</span>
@@ -303,17 +285,30 @@ export default function AccountForm() {
                   }`}
                   placeholder="0"
                 />
-                {/* {errors.curr_bal && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.curr_bal?.message}
-                  </p>
-                )} */}
               </div>
 
-              <div>
+            </div>
+
+            {/* Balance Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {/* <div>
                 <label className={`labelClass`}>
-                  Opening Balance <span className="text-red-500">*</span>
+                  Current Balance <span className="text-red-500">*</span>
                 </label>
+                <input readOnly
+                  {...register("curr_bal")}
+                  type="number"
+                  className={`inputClass ${
+                    errors.curr_bal ? inputErrorClass : ""
+                  }`}
+                  placeholder="0"
+                />
+              </div> */}
+
+              <div>
+                {/* <label className={`labelClass`}>
+                  Opening Balance <span className="text-red-500">*</span>
+                </label> */}
                 <input readOnly
                   {...register("yy_op_bal")}
                   type="number"
@@ -322,12 +317,9 @@ export default function AccountForm() {
                     errors.yy_op_bal ? inputErrorClass : ""
                   }`}
                   placeholder="0"
+                  hidden
                 />
-                {/* {errors.yy_op_bal && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.yy_op_bal?.message}
-                  </p>
-                )} */}
+
               </div>
                 <input
                   {...register("inp_by")}
@@ -337,11 +329,12 @@ export default function AccountForm() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+            <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-gray-200">
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-linear-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transform hover:scale-[1.02] transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                // className="flex-1 bg-linear-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transform hover:scale-[1.02] transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-save h-10"
               >
                 {loading ? (
                   <span className="flex items-center justify-center">
@@ -377,20 +370,38 @@ export default function AccountForm() {
                 type="button"
                 onClick={handleClear}
                 disabled={loading}
-                className="flex-1 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:border-gray-400 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-clear01 w-75 h-10"
+                //  w-full md:w-auto
+                // className="flex-1 border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:border-gray-400 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-blue-500"
               >
                 Clear Form
               </button>
             </div>
           </form>
+         {/* Message Alert */}
+        {/* {message && (
+          <div
+            className={`mb-1 rounded-lg px-6 py-4 shadow-sm border-l-4 ${
+              message.includes("✓")
+                ? "bg-green-50 border-green-500 text-green-800"
+                : message.includes("→")
+                ? "bg-blue-50 border-blue-500 text-blue-800"
+                : "bg-yellow-50 border-yellow-500 text-yellow-800"
+            }`}
+          >
+            <p className="font-medium">{message}</p>
+          </div>
+        )} */}
+
+
         </div>
 
         {/* Help Text */}
-        <div className="mt-6 text-center text-sm text-gray-600">
+        {/* <div className="mt-6 text-center text-sm text-gray-600">
           <p>
             💡 <strong>Tip:</strong> Enter an account number and press Tab to load existing data
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

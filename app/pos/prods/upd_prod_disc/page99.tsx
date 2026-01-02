@@ -1,40 +1,42 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Head from "next/head";
 import * as Yup from "yup";
-
+// Get "Today" at exactly 00:00:00 to avoid time-of-day validation issues
+const today = new Date();
+today.setHours(0, 0, 0, 0);
 // ---------------------- Yup Schema ----------------------
 const schema = Yup.object({
-  pur_prc: Yup.number()
-    .typeError("Invalid Purchase Price")
-    .required("Purchase Price is required")
-    .positive("Purchase Price must be > 0"),
+  disc_amt: Yup.number()
+    .typeError("Invalid Discount Amount")
+    .positive("Discount must be > 0"),
 
-  min_rsp: Yup.number()
-    .typeError("Invalid Min RSP")
-    .required("Min RSP is required")
-    .positive("Min RSP must be > 0"),
+  disc_pct: Yup.number()
+    .typeError("Invalid Discount Percentage")
+    .positive("Discount PCT must be > 0")
+    .min(5, "Discount must be at least 5%")
+    .max(75, "Discount cannot exceed 75%"),
 
-  max_rsp: Yup.number()
-    .typeError("Invalid Max RSP")
-    .required("Max RSP is required")
-    .positive("Max RSP must be > 0"),
+  // disc_st_dt: Yup.date()
+  //   .required("Start date is required")
+  //   .min(today, "Start date must be today or in the future"),
 
-  tax_pct: Yup.number()
-    .typeError("Invalid Tax Amount")
-    .min(0, "Tax cannot be negative")
-    .required("Tax Amount is required"),
+  // disc_end_dt: Yup.date()
+  //   .required("End date is required")
+  //   .min(
+  //     Yup.ref('disc_st_dt'), 
+  //     "End date must be later than the start date"
+  //   )
 });
 
 export default function UpdatePrices() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     prd_cd: "",
-    bar_cd: "",
-    pur_prc: "",
-    min_rsp: "",
-    max_rsp: "",
-    tax_pct: "",
+    disc_amt: "",
+    disc_pct: "",
+    disc_st_dt: "",
+    disc_end_dt: "",
   });
 
   // ------------------------------------------------------
@@ -42,23 +44,26 @@ export default function UpdatePrices() {
   // ------------------------------------------------------
   const [prdDesc, setPrdDesc] = useState('');
   const [prdCat, setPrdCat] = useState('');
-  const [prdCd, setPrdCd] = useState('');
-  const [prdBrand, setPrdBrand] = useState('');
+  const [prdMaxPrc, setPrdMaxPrc] = useState('');
   const handleChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+//    const { name, value } = e.target;
+//    setForm(prev => ({ ...prev, [name]: value }));
   };
+  // useEffect(() => {
+  //   console.log("Form updated:", form.disc_end_dt);
+  // }, [form.disc_st_dt]);
   //================= Clear Form =====================
   const clr_form = () => {
     setForm({
       prd_cd: "",
-      bar_cd: "",
-      pur_prc: "",
-      min_rsp: "",
-      max_rsp: "",
-      tax_pct: "",
+      disc_amt: "",
+      disc_pct: "",
+      disc_st_dt: "",
+      disc_end_dt: "",
     });
     setPrdCat('');
-    setPrdBrand('');
+    setPrdMaxPrc('');
     setPrdDesc('');
   };
 
@@ -66,40 +71,39 @@ export default function UpdatePrices() {
   // Fetch product details by prd_cd
   // ------------------------------------------------------
   const fetchProduct = async () => {
-    if (!form.bar_cd) {
+    if (!form.prd_cd) {
       alert("Enter Product Code first.");
       return;
     }
     setLoading(true);
     try {
-      const res = await fetch(`/api/pos/prods/get_prod_barcd?bar_cd=${form.bar_cd}`);
+      const res = await fetch(`/api/pos/prods/get_prod_mast?prd_cd=${form.prd_cd}`);
       const data = await res.json();
-
-      if (!res.ok) throw new Error("Record not found");
-      const wPrdCd = data.data.prd_cd;
-      setPrdDesc(data.data.prd_desc || "");
-      setPrdCat(data.data.prd_cat || "");
-//    setPrdCd(data.data.prd_cat || "");
-      setPrdBrand(data.data.prd_brand || "");
-    // } catch (err: any) {
-    //   alert(err.message);
-    // }
-    // try {
+//console.log(data);
+      if (!res.ok) throw new Error("Product Master Record not found");
+        setPrdDesc(data.data.prd_desc || "");
+        setPrdCat(data.data.prd_cat || "");
+    } catch (err: any) {
+      alert(err.message);
+    }
+    try {
     //api/pos/prods/get_prod_info?prd_cd=901
-      const resp = await fetch(`/api/pos/prods/get_prod_info?prd_cd=${wPrdCd}`);
-      if (!resp.ok) throw new Error("Prices Record not found");
-      const info = await resp.json();
+      const res = await fetch(`/api/pos/prods/get_prod_info?prd_cd=${form.prd_cd}`);
+      if (!res.ok) throw new Error("Prices Record not found");
+      const info = await res.json();
+      setPrdMaxPrc(info.data.max_rsp || "");
       setForm({
         ...form,
-        prd_cd:  info.data.prd_cd || "",
-        pur_prc: info.data.pur_prc || "",
-        min_rsp: info.data.min_rsp || "",
-        max_rsp: info.data.max_rsp || "",
-        tax_pct: info.data.tax_pct || "",
+        disc_amt: info.data.disc_amt,
+        disc_pct: info.data.disc_pct,
+        disc_st_dt: info.data.disc_st_dt || "",
+        disc_end_dt: info.data.disc_end_dt || "",
       });
     } catch (err: any) {
       alert(err.message);
     }
+
+
     setLoading(false);
   };
 
@@ -107,21 +111,23 @@ export default function UpdatePrices() {
   // Submit handler with Yup validation
   // ------------------------------------------------------
   const handleSubmit = async (e: any) => {
+        console.log(form);
+
     e.preventDefault();
 
     try {
       // Validate only the editable fields
       await schema.validate(
         {
-          pur_prc: form.pur_prc,
-          min_rsp: form.min_rsp,
-          max_rsp: form.max_rsp,
-          tax_pct: form.tax_pct,
+          disc_amt: form.disc_amt,
+          disc_pct: form.disc_pct,
+//          disc_st_dt: form.disc_st_dt,
+//          disc_end_dt: form.disc_end_dt,
         },
         { abortEarly: false }
       );
 
-      const res = await fetch("/api/pos/prods/save_prod_prcs", {
+      const res = await fetch("/api/pos/prods/save_prod_disc", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -129,7 +135,6 @@ export default function UpdatePrices() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-
       alert("Prices updated successfully!");
     } catch (err: any) {
       if (err.inner) {
@@ -137,13 +142,12 @@ export default function UpdatePrices() {
         const messages = err.inner.map((e: any) => e.message).join("\n");
         alert(messages);
       } else {
-        alert(err.message);
+        clr_form();
+//        alert(err.message);
       }
     }
   };
-
   // ------------------------------------------------------
-
   return (
     <>
       <Head>
@@ -172,8 +176,8 @@ export default function UpdatePrices() {
                   {/* <div className={"w-25 ml-2 mr-4"}> */}
                   <input
                     type="number"
-                    name="bar_cd"
-                    value={form.bar_cd}
+                    name="prd_cd"
+                    value={form.prd_cd}
                     onChange={handleChange}
                     onBlur={fetchProduct}
                     className="w-35 border border-black rounded px-3 py-2 text-sm"
@@ -190,87 +194,84 @@ export default function UpdatePrices() {
                 </div>
               </div>
               {/* Category */}
-              <div className="grid grid-cols-[5fr_5fr] gap-2 items-center">
-                <div>
-                  <label className={"mr-18"}>Category:</label>
-                  <input
-                    type="text"
-                    name="prd_cat"
-                    value={prdCat}
-                    disabled
-                    className="border border-black rounded px-3 py-2 text-sm w-32 bg-gray-100"
-                  />
-                </div>
+              <div className="grid grid-cols-[25%_25%_25%_25%] gap-2 border-b">
+                  <div className={"mr-1"}>Category:</div>
+                  <div>
+                    <input
+                      type="number"
+                      name="prd_cat"
+                      value={prdCat}
+                      disabled
+                      className="border border-black rounded px-3 py-2 text-sm w-32 bg-gray-100"
+                    />
+                  </div>               
+                  <div className={"mr-1"}>Max RSP:</div>
+                  <div>
+                    <input
+                      type="number"
+                      name="max_rsp"
+                      value={prdMaxPrc}
+                      disabled
+                      className="border border-black rounded px-3 py-2 text-sm w-32 bg-gray-100"
+                    />
+                </div>                
+              </div> {/* --==============  end of 4 col grid ========== */}
 
+              <div className="grid grid-cols-[25%_25%_25%_25%] gap-2 border-b">              
+                <div className={"mr-5"}>Discount %: </div>
                 <div>
-                  <label className={"mr-17"}>Brand:</label>
-                  <input
-                    type="text"
-                    name="prd_brand"
-                    value={prdBrand}
-                    disabled
-                    className="border border-black rounded px-3 py-2 text-sm w-32 bg-gray-100"
-                  />
+                    <input
+                      type="number"
+                      name="disc_pct"
+                      value={form.disc_pct}
+                      onChange={handleChange}
+                      className="border border-black rounded px-3 py-2 text-sm w-32"
+                    />
+                </div>              
+                <div className={"mr-7"}>
+                  Disc. Amount:<span className="text-red-500">*</span>
                 </div>
-              </div>
-              {/* info to be updated */}
-              {/* Purchase Price */}
-              {/* <div className="grid grid-cols-[2fr_8fr] gap-2 items-center"> */}
-              <div className="grid grid-cols-[5fr_5fr] gap-2 items-center">
                 <div>
-                  <label className={"mr-7"}>
-                    Purchase Price:<span className="text-red-500">*</span>
-                  </label>
                   <input
                     type="number"
-                    name="pur_prc"
-                    value={form.pur_prc}
+                    name="disc_amt"
+                    value={form.disc_amt}
                     onChange={handleChange}
                     className="border border-black rounded px-3 py-2 text-sm w-32"
                   />
                 </div>
+              </div> {/* --==============  end of 4 col grid ========== */}
+              <div className="grid grid-cols-[25%_25%_25%_25%] gap-2 border-b">              
+              </div> {/* --==============  end of 4 col grid ========== */}
+              <div className="grid grid-cols-[25%_25%_25%_25%] gap-2 border-b">              
+                <div className={"mr-1"}>
+                  Disc Start Dt:<span className="text-red-500">*</span>
+                </div>
                 <div>
-                  <label className={"mr-5"}>Tax %: </label>
                   <input
-                    type="number"
-                    name="tax_pct"
-                    value={form.tax_pct}
+                    type="date"
+                    name="disc_st_dt"
+                    value={form.disc_st_dt ? new Date(form.disc_st_dt).toISOString().split('T')[0] : ""}
                     onChange={handleChange}
                     className="border border-black rounded px-3 py-2 text-sm w-32"
                   />
                 </div>
-              </div>
-              {/* Min RSP */}
-              <div className="grid grid-cols-[5fr_5fr] gap-2 items-center">
+                <div className={"mr-10"}>
+                  Disc End Dt:<span className="text-red-500">*</span>
+                </div>
                 <div>
-                  <label className={"mr-18"}>
-                    Min RSP:<span className="text-red-500">*</span>
-                  </label>
                   <input
-                    type="number"
-                    name="min_rsp"
-                    value={form.min_rsp}
+                    type="date"
+                    name="disc_end_dt"
+                    value={form.disc_end_dt? new Date(form.disc_end_dt).toISOString().split('T')[0] : ""}
                     onChange={handleChange}
                     className="border border-black rounded px-3 py-2 text-sm w-32"
                   />
                 </div>
-                {/* Max RSP */}
-                <div>
-                  <label className={"mr-10"}>
-                    Max RSP:<span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="max_rsp"
-                    value={form.max_rsp}
-                    onChange={handleChange}
-                    className="border border-black rounded px-3 py-2 text-sm w-32"
-                  />
-                </div>
-              </div>
-              {/* Tax Amount */}
+              </div> {/* --==============  end of 4 col grid ========== */}
+
+              {/* //=========== Buttons ============== */}
               <div className="grid grid-cols-[2fr_3fr_5fr] gap-2 items-center">
-                <div></div>
                 <div>
                   <button
                     className="w-50 flex justify-center items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-6 rounded-md shadow-md"
@@ -290,7 +291,7 @@ export default function UpdatePrices() {
                     🧹 Clear
                   </button>
                 </div>
-              </div>
+              </div>    
             </form>
           </main>
         </div>
@@ -298,24 +299,3 @@ export default function UpdatePrices() {
     </>
   );
 }
-
-/* <button
-      type="button"
-      onClick={fetchRecord}
-      className="ml-3 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow-md"
-    >
-      {loading ? "..." : "Search"}
-    </button> 
-*/
-//console.log(data)
-//      setForm({
-//        ...form,
-        // prd_desc: data.data.prd_desc || "",
-        // prd_cat: data.data.prd_cat || "",
-        // prd_brand: data.data.prd_brand || "",
-//        pur_prc: data.data.pur_prc || "",
-//        min_rsp: data.data.min_rsp || "",
-//        max_rsp: data.data.max_rsp || "",
-//        tax_pct: data.data.tax_pct || "",
-//      });
-

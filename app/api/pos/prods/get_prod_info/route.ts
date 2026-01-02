@@ -44,7 +44,14 @@ export async function GET(
         exp_dt: true,
         prd_re_ord: true,
         prd_qoh: true,
-        max_rsp: true
+        max_rsp: true,
+        disc_pct: true,
+        disc_amt: true,
+        disc_st_dt: true,
+        disc_end_dt: true,
+        pur_prc: true,
+        tax_pct: true,
+        min_rsp: true
       },
     });
 

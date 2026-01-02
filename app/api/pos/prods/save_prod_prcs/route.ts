@@ -6,7 +6,6 @@ export async function PUT(req: Request) {
   try {
     const { prd_cd, pur_prc, min_rsp, max_rsp, tax_pct } = await req.json();
 
-    console.log(req.formData);
 console.log(max_rsp);
 console.log(min_rsp);
 

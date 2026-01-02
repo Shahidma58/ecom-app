@@ -22,6 +22,9 @@ model accts_Mod {
   inp_by     String   @db.VarChar
   inp_dt     DateTime @default(now()) @db.Timestamp(6)
 
+  // Relation to gen_ledg_Mod
+  generalLedger gen_ledg_Mod @relation(fields: [ac_gl], references: [gl_cd])
+
   @@map("accounts")
 }
 
@@ -62,7 +65,7 @@ model Fin_Tran_Mod {
   @@map("fin_tran")
 }
 
-model gen_Ledg_Mod {
+model gen_ledg_Mod {
   gl_cd    Decimal   @id @db.Decimal
   gl_desc  String
   gl_sdesc String?
@@ -71,7 +74,8 @@ model gen_Ledg_Mod {
   gl_stat  String
   inp_by   String
   inp_dt   DateTime? @default(now()) @db.Timestamp(6)
-
+  // Relation to accts_Mod
+  accounts   accts_Mod[]
   @@map("gen_ledg")
 }
 
