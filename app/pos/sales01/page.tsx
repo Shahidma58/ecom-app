@@ -1,10 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import "./sales01.css";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { api, setAccessToken } from "@/app/lib/apiClient";
-//import { get_str_date} from "../../../lib/udfs";
 
 const gVars = { gUser: "Demo User" };
 
@@ -51,7 +49,7 @@ export default function Sales01() {
     itm_cost: number;
     itm_amt: number;
     itm_stat: string;
-    itm_net_price: number; // Price after discount
+    itm_net_price: number;
   }
 
   interface SalTotal {
@@ -329,124 +327,124 @@ export default function Sales01() {
   };
 
   return (
-    <div className="sales-container">
-      <header className="sales-header">
-        <div className="sales-header-content">
-          <div className="sales-header-left">
-            <h1 className="sales-title">HerbaGlam - Cosmetics Universe</h1>
+    <div className="min-h-screen bg-gray-100 flex flex-col text-gray-800">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-teal-700 to-teal-500 text-white shadow-md">
+        <div className="max-w-full mx-auto px-4 py-2.5 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg font-semibold text-white m-0">
+              HerbaGlam - Cosmetics Universe
+            </h1>
             {user?.branch_code && (
-              <span className="branch-badge">Branch: {user.branch_code}</span>
+              <span className="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-semibold border border-white/30 backdrop-blur tracking-wide">
+                Branch: {user.branch_code}
+              </span>
             )}
           </div>
-          <div className="sales-header-right">
-            <div className="user-info">
-              <span className="user-name">{user?.name}</span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-teal-100 font-medium">{user?.name}</span>
             </div>
-            <div className="sales-date">{wStr_Dt}</div>
+            <div className="text-sm text-teal-100 font-medium">{wStr_Dt}</div>
           </div>
         </div>
       </header>
 
-      {/* Customer Info */}
-      <div className="sales-form-card">
-        <div className="sales-form-grid">
-          <div className="sales-form-col-4">
-            <input
-              type="tel"
-              name="sal_mbl"
-              placeholder="Customer Mobile Number"
-              className="sales-input"
-              value={customerMobile}
-              maxLength={15}
-              onChange={(e) =>
-                setCustomerMobile(e.target.value.replace(/\D/g, ""))
-              }
-            />
-          </div>
-        </div>
-      </div>
 
-      <div className="sales-content">
+
+      <div className="max-w-full mt-2 mx-auto px-4 pb-3 flex-1 flex flex-col">
         {/* Product Input */}
-        <div className="sales-form-card">
-          <div className="sales-form-grid">
-            <div className="sales-form-col-2">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-300 p-3 mb-3">
+          <div className="flex items-end gap-2">
+            <div className="flex-none w-24">
+              <label className="text-xs font-medium text-gray-600 mb-1 block">Code</label>
               <input
                 type="text"
                 name="itm_cd"
-                placeholder="Product Code"
-                className="sales-input"
+                placeholder="Code"
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md bg-white transition-all focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30 focus:outline-none"
                 value={form.itm_cd || ""}
                 onChange={handleInputChange}
                 onBlur={() => fetchProd(Number(form.itm_cd))}
                 onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
               />
             </div>
-            <div className="sales-form-col-4">
+            <div className="flex-1 min-w-0">
+              <label className="text-xs font-medium text-gray-600 mb-1 block">Description</label>
               <input
                 type="text"
                 placeholder="Product Description"
-                className="sales-input sales-input-readonly"
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md bg-gray-50 text-gray-500 transition-all focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30 focus:outline-none"
                 value={form.itm_desc}
                 readOnly
                 onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
               />
             </div>
-            <div className="sales-form-col-1">
+            <div className="flex-none w-28">
+              <label className="text-xs font-medium text-gray-600 mb-1 block">Qty</label>
               <input
                 name="itm_qty"
                 type="number"
                 placeholder="Qty"
-                className="sales-input"
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md bg-white transition-all focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30 focus:outline-none"
                 value={form.itm_qty}
                 onChange={handleInputChange}
                 onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
               />
             </div>
-            <div className="sales-form-col-1">
+            <div className="flex-none w-24">
+              <label className="text-xs font-medium text-gray-600 mb-1 block">Price</label>
               <input
                 name="itm_rsp"
                 type="number"
                 placeholder="Price"
-                className="sales-input"
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md bg-white transition-all focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30 focus:outline-none"
                 value={form.itm_rsp}
                 onChange={handleInputChange}
                 onKeyDown={(e) => e.key === "Enter" && handleAddItem()}
               />
             </div>
-            <div className="sales-form-col-1">
+            <div className="flex-none w-24">
+              <label className="text-xs font-medium text-gray-600 mb-1 block">Disc</label>
               <input
                 name="itm_disc"
                 type="number"
                 placeholder="Disc"
-                className="sales-input sales-input-readonly"
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md bg-gray-50 text-gray-500 transition-all focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30 focus:outline-none"
                 value={form.itm_disc}
                 readOnly
               />
             </div>
-            <div className="sales-form-col-1">
+            <div className="flex-none w-28">
+              <label className="text-xs font-medium text-gray-600 mb-1 block">Net Price</label>
               <input
                 name="itm_net_price"
                 type="number"
-                placeholder="Net Price"
-                className="sales-input sales-input-readonly"
+                placeholder="Net"
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md bg-gray-50 text-gray-500 transition-all focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30 focus:outline-none"
                 value={form.itm_net_price}
                 readOnly
               />
             </div>
-            <div className="sales-form-col-2">
+            <div className="flex-none w-28">
+              <label className="text-xs font-medium text-gray-600 mb-1 block">Total</label>
               <input
                 name="itm_amt"
                 type="number"
                 placeholder="Total"
-                className="sales-input sales-input-readonly"
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md bg-gray-50 text-gray-500 transition-all focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30 focus:outline-none"
                 value={form.itm_amt}
                 readOnly
               />
             </div>
-            <div className="sales-form-col-1">
+            <div className="flex-none w-16">
+              <label className="text-xs font-medium text-gray-600 mb-1 block opacity-0">Action</label>
               <button
-                className={`sales-btn-return ${returnMode ? "active" : ""}`}
+                className={`w-full px-2 py-1.5 text-sm font-semibold rounded-md border-none cursor-pointer transition-all ${
+                  returnMode
+                    ? "bg-red-600 text-white shadow-md shadow-red-600/40"
+                    : "bg-amber-500 text-white hover:bg-amber-600"
+                }`}
                 onClick={() => setReturnMode(!returnMode)}
                 type="button">
                 Return
@@ -456,119 +454,173 @@ export default function Sales01() {
         </div>
 
         {/* Items Table */}
-        <div className="sales-table-card">
-          <table className="sales-table">
-            <thead>
-              <tr>
-                <th>Code</th>
-                <th>Description</th>
-                <th className="text-right">Qty</th>
-                <th className="text-right">Price</th>
-                <th className="text-right">Disc</th>
-                <th className="text-right">Net Price</th>
-                <th className="text-right">Total</th>
-                <th className="text-center">✖</th>
-              </tr>
-            </thead>
-            <tbody>
-              {salItems.length === 0 ? (
+        <div className="bg-white rounded-xl border border-gray-300 shadow-sm mb-3 overflow-hidden max-h-96 flex-1">
+          <div className="overflow-auto max-h-full">
+            <table className="w-full text-sm border-collapse">
+              <thead className="bg-sky-100 sticky top-0">
                 <tr>
-                  <td colSpan={8} className="sales-table-empty">
-                    No items added yet
-                  </td>
+                  <th className="bg-sky-100 px-3 py-2 text-left text-xs font-semibold text-slate-900 border-b border-gray-200 w-24">
+                    Code
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-semibold text-slate-900 border-b border-gray-200 w-96">
+  Description
+</th>
+
+                  <th className="bg-sky-100 px-3 py-2 text-center text-xs font-semibold text-slate-900 border-b border-gray-200 w-28">
+                    Qty
+                  </th>
+                  <th className="bg-sky-100 px-3 py-2 text-right text-xs font-semibold text-slate-900 border-b border-gray-200 w-24">
+                    Price
+                  </th>
+                  <th className="bg-sky-100 px-3 py-2 text-right text-xs font-semibold text-slate-900 border-b border-gray-200 w-24">
+                    Disc
+                  </th>
+                  <th className="bg-sky-100 px-3 py-2 text-right text-xs font-semibold text-slate-900 border-b border-gray-200 w-28">
+                    Net Price
+                  </th>
+                  <th className="bg-sky-100 px-3 py-2 text-right text-xs font-semibold text-slate-900 border-b border-gray-200 w-28">
+                    Total
+                  </th>
+                  <th className="bg-sky-100 px-3 py-2 text-center text-xs font-semibold text-slate-900 border-b border-gray-200 w-16">
+                    ✖
+                  </th>
                 </tr>
-              ) : (
-                salItems.map((item, index) => (
-                  <tr key={index} className={returnMode ? "row-return" : ""}>
-                    <td>{item.itm_cd}</td>
-                    <td>{item.itm_desc}</td>
-                    <td className="text-right">
-                      <div className="qty-control">
-                        <button
-                          className="qty-btn"
-                          onClick={() => {
-                            setSalItems((prev) => {
-                              const updated = [...prev];
-                              const newQty = Math.max(
-                                1,
-                                updated[index].itm_qty - 1
-                              );
-                              updated[index].itm_qty = newQty;
-                              updated[index].itm_amt =
-                                newQty * Number(updated[index].itm_net_price);
-                              updateTotals(updated);
-                              return updated;
-                            });
-                          }}>
-                          –
-                        </button>
-                        <span className="qty-value">{item.itm_qty}</span>
-                        <button
-                          className="qty-btn"
-                          onClick={() => {
-                            setSalItems((prev) => {
-                              const updated = [...prev];
-                              const newQty = updated[index].itm_qty + 1;
-                              updated[index].itm_qty = newQty;
-                              updated[index].itm_amt =
-                                newQty * Number(updated[index].itm_net_price);
-                              updateTotals(updated);
-                              return updated;
-                            });
-                          }}>
-                          +
-                        </button>
-                      </div>
-                    </td>
-                    <td className="text-right">{item.itm_rsp.toFixed(2)}</td>
-                    <td className="text-right">
-                      {item.itm_disc > 0 ? item.itm_disc.toFixed(2) : "-"}
-                    </td>
-                    <td className="text-right">{item.itm_net_price.toFixed(2)}</td>
-                    <td className="text-right">{item.itm_amt.toFixed(2)}</td>
-                    <td className="text-center">
-                      <button
-                        className="sales-btn-delete"
-                        onClick={() => handleRemoveItem(index)}>
-                        ✕
-                      </button>
+              </thead>
+              <tbody className="bg-white">
+                {salItems.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="px-3 py-8 text-center text-gray-400 text-sm">
+                      No items added yet
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  salItems.map((item, index) => (
+                    <tr
+                      key={index}
+                      className={`border-b border-gray-200 transition-colors hover:bg-green-50 ${
+                        returnMode ? "bg-rose-50 text-red-800 font-semibold" : ""
+                      }`}>
+                      <td className="px-3 py-2 text-gray-700 w-24">{item.itm_cd}</td>
+                      <td className="px-3 py-2 text-gray-700">{item.itm_desc}</td>
+                      <td className="px-3 py-2 text-center w-28">
+                        <div className="inline-flex items-center justify-center bg-gray-50 rounded-md overflow-hidden border border-gray-300">
+                          <button
+                            className="bg-sky-100 text-sky-700 border-none px-2 py-1 text-sm font-semibold cursor-pointer transition-all hover:bg-sky-200"
+                            onClick={() => {
+                              setSalItems((prev) => {
+                                const updated = [...prev];
+                                const newQty = Math.max(
+                                  1,
+                                  updated[index].itm_qty - 1
+                                );
+                                updated[index].itm_qty = newQty;
+                                updated[index].itm_amt =
+                                  newQty * Number(updated[index].itm_net_price);
+                                updateTotals(updated);
+                                return updated;
+                              });
+                            }}>
+                            –
+                          </button>
+                          <span className="w-8 text-center bg-white font-semibold text-sm text-gray-900 py-1 border-l border-r border-gray-300">
+                            {item.itm_qty}
+                          </span>
+                          <button
+                            className="bg-sky-100 text-sky-700 border-none px-2 py-1 text-sm font-semibold cursor-pointer transition-all hover:bg-sky-200"
+                            onClick={() => {
+                              setSalItems((prev) => {
+                                const updated = [...prev];
+                                const newQty = updated[index].itm_qty + 1;
+                                updated[index].itm_qty = newQty;
+                                updated[index].itm_amt =
+                                  newQty * Number(updated[index].itm_net_price);
+                                updateTotals(updated);
+                                return updated;
+                              });
+                            }}>
+                            +
+                          </button>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 text-right text-gray-700 w-24">
+                        {item.itm_rsp.toFixed(2)}
+                      </td>
+                      <td className="px-3 py-2 text-right text-gray-700 w-24">
+                        {item.itm_disc > 0 ? item.itm_disc.toFixed(2) : "-"}
+                      </td>
+                      <td className="px-3 py-2 text-right text-gray-700 w-28">
+                        {item.itm_net_price.toFixed(2)}
+                      </td>
+                      <td className="px-3 py-2 text-right text-gray-700 w-28">
+                        {item.itm_amt.toFixed(2)}
+                      </td>
+                      <td className="px-3 py-2 text-center w-16">
+                        <button
+                          className="border-none cursor-pointer transition-colors text-xs text-red-600 bg-red-100 rounded px-2 py-1 hover:text-red-900"
+                          onClick={() => handleRemoveItem(index)}>
+                          ✕
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Totals Section */}
-        <div className="sales-totals-card">
-          <div className="sales-totals-grid">
-            <div>
-              <label>Total Items</label>
-              <input type="text" readOnly value={salTotals.sal_items} />
+        <div className="bg-gradient-to-r from-emerald-700 to-teal-600 text-white rounded-lg shadow-lg shadow-emerald-900/25 px-4 py-2 sticky bottom-0 mt-auto border-none animate-slideUp">
+          <div className="grid grid-cols-6 gap-3 items-center">
+            <div className="flex flex-col">
+              <span className="text-xs font-medium opacity-80 mb-0.5">Items</span>
+              <div className="bg-white/95 rounded-md p-1 text-center">
+                <span className="text-emerald-700 text-base">{salTotals.sal_items}</span>
+              </div>
             </div>
-            <div>
-              <label>Total Qty</label>
-              <input type="text" readOnly value={salTotals.sal_qty} />
+            <div className="flex flex-col">
+              <span className="text-xs font-medium opacity-80 mb-0.5">Qty</span>
+              <div className="bg-white/95 rounded-md p-1 text-center">
+                <span className="text-emerald-700  text-base">{salTotals.sal_qty}</span>
+              </div>
             </div>
-            <div>
-              <label>Total Discount</label>
-              <input type="text" readOnly value={salTotals.sal_disc.toFixed(2)} />
+            <div className="flex flex-col">
+              <span className="text-xs font-medium opacity-80 mb-0.5">Discount</span>
+              <div className="bg-white/95 rounded-md p-1 text-center">
+                <span className="text-emerald-700  text-base">{salTotals.sal_disc.toFixed(2)}</span>
+              </div>
             </div>
-            <div>
-              <label>Net Amount</label>
+            <div className="flex flex-col">
+              <span className="text-xs font-medium opacity-80 mb-0.5">Net Amount</span>
+              <div className={`rounded-md p-1 text-center ${
+                returnMode
+                  ? "bg-red-900 border border-red-600"
+                  : "bg-white/95"
+              }`}>
+                <span className={`text-base ${
+                  returnMode ? "text-red-100" : "text-emerald-700"
+                }`}>{salTotals.sal_amt.toFixed(2)}</span>
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs font-medium opacity-80 mb-0.5">Mobile</span>
               <input
-                type="text"
-                readOnly
-                value={salTotals.sal_amt.toFixed(2)}
-                className={returnMode ? "negative-total" : ""}
+                type="tel"
+                name="sal_mbl"
+                placeholder="03XX-XXXXXXX"
+                className="w-full p-1 rounded-md border-none bg-white/95  text-emerald-700 text-base text-center focus:outline-none focus:ring-2 focus:ring-white/50"
+                value={customerMobile}
+                maxLength={15}
+                onChange={(e) =>
+                  setCustomerMobile(e.target.value.replace(/\D/g, ""))
+                }
               />
             </div>
-            <div>
+            <div className="flex flex-col justify-end">
               <button
                 onClick={handleSaveTran}
                 disabled={loading || salItems.length === 0}
-                className="sales-btn-save">
+                className="bg-emerald-900 mt-4 text-white w-full px-4 py-1.5 text-sm font-bold rounded-md border-none cursor-pointer transition-all shadow-md hover:bg-blue-700 hover:shadow-lg disabled:bg-white/30 disabled:text-white/60 disabled:cursor-not-allowed disabled:shadow-none">
                 {loading
                   ? "Processing..."
                   : returnMode
@@ -579,8 +631,28 @@ export default function Sales01() {
           </div>
         </div>
 
-        {error && <div className="sales-error">{error}</div>}
+        {error && (
+          <div className="mt-3 bg-red-50 border border-red-200 text-red-800 px-4 py-2 rounded text-sm">
+            {error}
+          </div>
+        )}
       </div>
+
+      <style jsx>{`
+        @keyframes slideUp {
+          from {
+            transform: translateY(10px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+        .animate-slideUp {
+          animation: slideUp 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 }

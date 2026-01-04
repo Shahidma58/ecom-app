@@ -1,82 +1,81 @@
-'use client'
+'use client';
+
 import React, { useState } from 'react';
-import { Leaf, PanelTop, ArrowRight } from 'lucide-react';
-import { useRouter } from "next/navigation";
+import { useRouter } from 'next/navigation';
+import {
+  BarChart3,
+  TrendingUp,
+  BookOpen,
+  Users,
+  Package,
+  FileText,
+  Settings,
+  Wallet,
+  ArrowDownToLine,
+  ArrowLeftRight,
+  ShoppingCart,
+  ShoppingBag,
+} from 'lucide-react';
+import Header from '../custom_components/Header';
+import ButtonWithIcon from '../custom_components/ButtonWithIcon';
+import Footer from '../custom_components/Footer';
 
-// Define the single, comprehensive Tailwind class for all 12 buttons.
-const GREEN_BUTTON_STYLE =
-  'bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-2 rounded-xl ' +
-  'shadow-lg hover:shadow-xl transition duration-300 ease-in-out transform hover:scale-[1.02] ' +
-  'flex items-center justify-center space-x-2 w-full text-lg';
-
-// Define the names and explicit paths for the 12 mock pages as an array of objects.
 interface PageInfo {
   name: string;
   path: string;
+  icon: React.ComponentType<{ className?: string }>;
 }
-const PAGE_DATA = [
-  { name: "Daily Stats", path: "/pos/dashboard" },
-  { name: "Key Metrics", path: "/pos/dashboard/dash01" },
-  { name: "Display G/Ls", path: "/pos/gen_ledg/gl_enq" },
-  { name: "Display Accounts", path: "/pos/accts/acct_enq" },
-  { name: "Display Products", path: "/pos/prods/prod_enq" },
-  { name: "Account & G/L Statement", path: "/pos/accts/stmt" },
-  { name: "Product/GL Maintenance", path: "/menu02" },
-  { name: "Pay Cash", path: "/pos/finTran/payCash" },
-  { name: "Recieve Cash", path: "/pos/finTran/rcvCash" },
-  { name: "Account to Account", path: "/pos/finTran/acctToAcct" },
-  { name: "Counter Sales", path: "/pos/sales01" },
-  { name: "Purchases", path: "/pos/purch01" }
- ];
 
-const App = () => {
+const PAGE_DATA: PageInfo[] = [
+  { name: 'Daily Stats', path: '/pos/dashboard', icon: BarChart3 },
+  { name: 'Key Metrics', path: '/pos/dashboard/dash01', icon: TrendingUp },
+  { name: 'Display G/Ls', path: '/pos/gen_ledg/gl_enq', icon: BookOpen },
+  { name: 'Display Accounts', path: '/pos/accts/acct_enq', icon: Users },
+  { name: 'Display Products', path: '/pos/prods/prod_enq', icon: Package },
+  { name: 'Account & G/L Statement', path: '/pos/accts/stmt', icon: FileText },
+  { name: 'Product/GL Maintenance', path: '/menu02', icon: Settings },
+  { name: 'Pay Cash', path: '/pos/finTran/payCash', icon: Wallet },
+  { name: 'Receive Cash', path: '/pos/finTran/rcvCash', icon: ArrowDownToLine },
+  { name: 'Account to Account', path: '/pos/finTran/acctToAcct', icon: ArrowLeftRight },
+  { name: 'Counter Sales', path: '/pos/sales01', icon: ShoppingCart },
+  { name: 'Purchases', path: '/pos/purch01', icon: ShoppingBag },
+];
+
+const App: React.FC = () => {
   const router = useRouter();
-//  const [navigationStatus, setNavigationStatus] = useState("Point of Sale");
-const [navigationStatus, setNavigationStatus] = useState<string>("Point of Sale");
-  // Function to handle the navigation event using the explicit path
+  const [navigationStatus, setNavigationStatus] = useState('Point of Sale');
+
   const handleNavigation = (name: string, path: string) => {
-    // In a real Next.js app, you would use: useRouter().push(path);
-//    console.log(`Navigating to: ${path}`);
-//    setNavigationStatus(`Mapsd to: ${name} (${path})`);
+    setNavigationStatus(`Navigating to: ${name}`);
     router.push(path);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans antialiased flex flex-col items-center p-4 sm:p-8">
-      
-      {/* Top Banner Section */}
-      {/* <header className="w-full max-w-4xl mb-12 bg-emerald-50 border-b-4 border-emerald-600 rounded-xl shadow-lg p-6">
-        <div className="flex items-center space-x-3 text-emerald-800">
-          <PanelTop className="w-8 h-8" />
-          <h1 className="text-3xl font-bold tracking-tight">Green Shade Command Center</h1>
-        </div>
-        <p className="mt-2 text-emerald-600">
-          Select a module below to begin. All buttons share the same single Tailwind class for consistent styling.
-        </p>
-      </header> */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/20 to-slate-100 font-sans antialiased">
+      <Header />
 
-      {/* Navigation Status Message */}
-      <div className="w-full max-w-4xl text-center mb-3 p-3 bg-green-900 text-white font-extrabold rounded-lg">
-        {navigationStatus}
+      {/* Status */}
+      <div className="max-w-5xl mx-auto px-6 lg:px-8 mt-8">
+        <div className="bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-600 text-white font-bold rounded-2xl px-6 py-4 shadow-xl text-center border border-emerald-800">
+          <p className="text-lg tracking-wide">{navigationStatus}</p>
+        </div>
       </div>
 
-      {/* Centered Button Grid */}
-      <div className="w-full max-w-4xl">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
-          {PAGE_DATA.map((page, index) => (
-            <button
-              key={index}
-              className={GREEN_BUTTON_STYLE} // Applying the single defined class
+      {/* Buttons Grid */}
+      <main className="max-w-5xl mx-auto px-6 lg:px-8 py-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {PAGE_DATA.map((page) => (
+            <ButtonWithIcon
+              key={page.path}
+              Icon={page.icon}
+              label={page.name}
               onClick={() => handleNavigation(page.name, page.path)}
-            >
-              <Leaf className="w-5 h-5" />
-              <span>{page.name}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            />
           ))}
         </div>
-      </div>
+      </main>
 
+      <Footer />
     </div>
   );
 };
