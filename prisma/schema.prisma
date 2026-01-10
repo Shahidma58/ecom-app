@@ -415,7 +415,7 @@ model purch_batch {
 model purch_detl {
   pur_id      Decimal   @db.Decimal(14, 0)
   pur_id_serl Int
-  prd_cd      Decimal   @db.Decimal(7, 0)
+  prd_cd      Decimal  @db.Decimal(15, 0)
   brn_cd      Decimal   @db.Decimal(3, 0)
   prd_desc    String
   pur_qty     Decimal   @db.Decimal(12, 0)
