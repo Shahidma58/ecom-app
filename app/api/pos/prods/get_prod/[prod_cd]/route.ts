@@ -4,11 +4,12 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: NextRequest,
-  context: { params: Promise<{ prd_cd: string }> }
+  context: { params: Promise<{ prod_cd: string }> }
 ) {
   try {
-    const { prd_cd } = await context.params; 
-    const prd_cod = Number(prd_cd); // prod_cd;  //
+    const { prod_cd } = await context.params; 
+    console.log("route: ", prod_cd)
+    const prd_cod = Number(prod_cd); // prod_cd;  //
     // Validate
     if (!prd_cod) {
       return NextResponse.json(
