@@ -1,9 +1,9 @@
+//       router.push(`/pos/bill/${data.tran_id}`);
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import "./bill.css";
-import { useAuth } from "@/app/context/AuthContext";
+//import { useAuth } from "@/app/context/AuthContext";
 
 interface SaleItem {
   itm_cd: number;

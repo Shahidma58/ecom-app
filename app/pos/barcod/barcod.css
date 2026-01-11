@@ -1,0 +1,9 @@
+svg {
+  max-width: 100%;
+}
+
+@media print {
+  svg {
+    page-break-inside: avoid;
+  }
+}
