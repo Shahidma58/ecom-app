@@ -21,6 +21,7 @@ const PAGE_DATA = [
   { name: "Update Products Prices", path: "/pos/prods/upd_prod_prcs" },
   { name: "Update Prod Discount Info.", path: "/pos/prods/upd_prod_disc" },
   { name: "Update Prod Other Info.", path: "/pos/prods/upd_prod_info" },
+  { name: "Add/Update Users", path: "/pos/users" },
  ];
 
 const App = () => {

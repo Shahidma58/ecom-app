@@ -6,7 +6,7 @@ import { setRefreshTokenCookie } from "@/app/lib/cookies";
 import { prisma } from "@/lib/prisma";
 
 interface UserFromDB {
-  id: string;
+  usr_id: string;
   email: string;
   password: string;
   name: string;
@@ -27,7 +27,33 @@ async function findUserByEmail(email: string): Promise<UserFromDB | null> {
 
     // Map Prisma fields to our interface
     return {
-      id: user.usr_id,
+      usr_id: user.usr_id,
+      email: user.usr_email,
+      password: user.pswd_hash || "",
+      name: user.usr_name,
+      branch_code: user.brn_cd,
+    };
+  } catch (error) {
+    console.error("Database query error:", error);
+    return null;
+  }
+}
+
+async function findUserById(user_id: string): Promise<UserFromDB | null> {
+  try {
+    const user = await prisma.users_Mod.findFirst({
+      where: {
+        usr_id: user_id,
+      },
+    });
+
+    if (!user) {
+      return null;
+    }
+
+    // Map Prisma fields to our interface
+    return {
+      usr_id: user.usr_id,
       email: user.usr_email,
       password: user.pswd_hash || "",
       name: user.usr_name,
@@ -52,38 +78,38 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user in database
-    const user = await findUserByEmail(email);
+    const user = await findUserById(email);
 
     if (!user) {
       return NextResponse.json(
-        { error: "Invalid credentials" },
+        { error: "Invalid credentials--aa---" },
         { status: 401 }
       );
     }
 
    
-
+console.log(user.password);
     // Check if password is set
-    // if (!user.password) {
-    //   return NextResponse.json(
-    //     { error: "Password not set for this account" },
-    //     { status: 401 }
-    //   );
-    // }
+    if (!user.password) {
+      return NextResponse.json(
+        { error: "Password not set for this account" },
+        { status: 401 }
+      );
+    }
 
     // // Verify password
-    // const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidPassword = await bcrypt.compare(password, user.password);
 
-    // if (!isValidPassword) {
-    //   return NextResponse.json(
-    //     { error: "Invalid credentials" },
-    //     { status: 401 }
-    //   );
-    // }
+    if (!isValidPassword) {
+      return NextResponse.json(
+        { error: "Invalid credentials---" },
+        { status: 401 }
+      );
+    }
 
     // Generate tokens
     const tokenPayload = {
-      userId: user.id,
+      userId: user.usr_id,
       email: user.email,
       branch_code: user.branch_code,
       username: user.name
@@ -94,7 +120,7 @@ export async function POST(request: NextRequest) {
 
     // Update last login time
     await prisma.users_Mod.update({
-      where: { usr_id: user.id },
+      where: { usr_id: user.usr_id },
       data: { last_login: new Date() },
     });
 
@@ -102,7 +128,7 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({
       accessToken,
       user: {
-        id: user.id,
+        id: user.usr_id,
         email: user.email,
         name: user.name,
         branch_code: user.branch_code
