@@ -53,7 +53,7 @@ export default function TransactionFooter({
 
   return (
     <>
-      <div className="bg-gradient-to-r from-emerald-700 to-teal-600 text-white rounded-lg shadow-lg shadow-emerald-900/25 px-4 py-2 sticky bottom-0 mt-auto border-none animate-slideUp">
+      <div className="bg-linear-to-r from-emerald-700 to-teal-600 text-white rounded-lg shadow-lg shadow-emerald-900/25 px-1 py-1 sticky bottom-0 mt-auto border-none animate-slideUp">
         <div className="grid grid-cols-6 gap-3 items-center">
           <div className="flex flex-col">
             <span className="text-xs font-medium opacity-80 mb-0.5">
@@ -107,7 +107,8 @@ export default function TransactionFooter({
 
           <div className="flex flex-col">
             <span className="text-xs font-medium opacity-80 mb-0.5">
-              {defaultLabels.mobile}
+              Mobile:
+              {/* {defaultLabels.mobile} */}
             </span>
             <input
               type="tel"

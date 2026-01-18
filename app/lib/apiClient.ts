@@ -52,6 +52,8 @@ export async function apiClient(
   // Build headers using Headers constructor
   const requestHeaders = new Headers(options.headers || {});
 
+//  console.log(accessToken)
+
   // Set content type if not already set
   if (!requestHeaders.has("Content-Type")) {
     requestHeaders.set("Content-Type", "application/json");

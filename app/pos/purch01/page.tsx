@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { api, setAccessToken } from "@/app/lib/apiClient";
@@ -41,12 +41,12 @@ export default function Purchase01() {
   const [amountPaid, setAmountPaid] = useState<string>("");
 
   // Fetch vendor function
-  const fetchVendorApi = async (ac_no: string) => {
-    const resp = await api.get(`/api/pos/accts/get_acct/${ac_no}`);
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || "Failed to fetch Vendor");
-    return data;
-  };
+  // const fetchVendorApi = async (ac_no: string) => {
+  //   const resp = await api.get(`/api/pos/accts/get_acct/${ac_no}`);
+  //   const data = await resp.json();
+  //   if (!resp.ok) throw new Error(data.error || "Failed to fetch Vendor");
+  //   return data;
+  // };
 
   const {
     form,
@@ -55,9 +55,9 @@ export default function Purchase01() {
     loading,
     error,
     returnMode,
-    customerMobile,
+    // customerMobile,
     setReturnMode,
-    setCustomerMobile,
+    // setCustomerMobile,
     setError,
     fetchProduct,
     handleAddItem,
@@ -167,7 +167,7 @@ export default function Purchase01() {
         {/* Vendor Selection Component */}
         <VendorSelector
           onVendorSelect={handleVendorSelect}
-          fetchVendorApi={fetchVendorApi}
+//          fetchVendorApi={fetchVendorApi}
         />
 
         <TransactionInputForm

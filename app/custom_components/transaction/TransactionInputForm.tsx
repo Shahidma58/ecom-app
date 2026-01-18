@@ -1,4 +1,6 @@
 import React from "react";
+//import React , { useRef, useEffect } from "react";
+//const prdCd_Ref = useRef<HTMLInputElement>(null);
 
 interface FormItem {
   itm_cd: number | string;
@@ -30,6 +32,7 @@ interface TransactionInputFormProps {
 }
 
 export default function TransactionInputForm({
+  
   form,
   returnMode,
   onInputChange,
@@ -56,13 +59,14 @@ export default function TransactionInputForm({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-300 p-3 mb-3">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-300 p-2 mb-1">
       <div className="flex items-end gap-2">
         <div className="flex-none w-24">
           <label className="text-xs font-medium text-gray-600 mb-1 block">
             {defaultLabels.code}
           </label>
           <input
+//            ref={prdCd_Ref}
             type="text"
             name="itm_cd"
             placeholder={defaultLabels.code}
