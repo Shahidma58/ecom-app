@@ -8,13 +8,11 @@ export interface Pur_Detl {
   itm_rsp: number
   itm_qty: number
   itm_disc: number    // not used
-//  itm_net_price: number   // not used
   itm_tot_amt: number 
   itm_prc: number
   cur_rsp: number
   cur_pur_prc: number
   itm_tax?: number
-//  returnMode: boolean
 }
 
 export interface Pur_Batch {
@@ -26,10 +24,6 @@ export interface Pur_Batch {
   vnd_ac_no: string
   paid_amt: number
   net_amt: number
-//  vnd_name: string;
-//  pur_id: number
-//  sal_dt: Date
-//  inp_by: string
 }
 
 /* =========================
@@ -60,10 +54,6 @@ const emptyTotals: Pur_Batch = {
   vnd_ac_no: "",
   paid_amt: 0,
   net_amt: 0
-//  vnd_name: "",
-//  sal_id: 0,
-//  sal_dt: new Date(),
-//  inp_by: "",
 };
 
 /* =========================
@@ -87,6 +77,7 @@ const calculateTotals = (items: Pur_Detl[]): Pur_Batch => ({
   bch_disc: items.reduce((s, i) => s + i.itm_disc, 0),
   bch_amt: items.reduce((s, i) => s + i.itm_prc, 0),
 });
+
 
 /* =========================
    STORE INTERFACE
@@ -113,6 +104,7 @@ interface PurchaseStore {
   clearCart: () => void;
 
   setCustomerMobile: (value: string) => void;
+  updStorePaidAmt: (value: number) => void;
   toggleReturnMode: () => void;
   finalizeSale: () => Promise<void>;
 }
@@ -142,6 +134,20 @@ export const usePurchaseStore = create<PurchaseStore>((set, get) => ({
 
   resetCurrentItem: () => set({ currentItem: emptyItem }),
 
+  updStorePaidAmt: (amount: number) => {
+    const { totals } = get();
+    const paid = Math.max(0, amount);
+    const net = Math.max(0, totals.bch_amt - paid);
+    set({
+      totals: {
+        ...totals,
+        paid_amt: paid,
+        net_amt: net,
+      },
+    });
+    console.log(totals.paid_amt);
+    console.log("paid_amt from store");
+  },
   /* ---------- CART ---------- */
   addItem: (item) => {
     const items = [...get().items];
@@ -198,6 +204,8 @@ export const usePurchaseStore = create<PurchaseStore>((set, get) => ({
   },
 
   /* ---------- FOOTER / FINALIZE ---------- */
+
+
   setCustomerMobile: (value) => set({ customerMobile: value }),
 
   toggleReturnMode: () =>

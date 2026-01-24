@@ -1,6 +1,6 @@
 "use client";
 
-import React, {useState} from "react";
+import React, { useState, useEffect } from "react";
 import { api } from "../../../lib/apiClient";
 import { useRouter } from "next/navigation";
 
@@ -13,74 +13,105 @@ export default function Tran_Footer() {
     totals,
     finalizeSale,
     items,
+    updStorePaidAmt,
+    setCustomerMobile
   } = usePurchaseStore();
+  
   const router = useRouter();
 
-//  const disabled = items.length === 0;
   const [error, setError] = useState<string | null>(null);
   const [returnMode, setReturnMode] = useState(false);
-  const [isLoading, seIsLoading] = useState(false);
-  //====================================================================
-  const wTrn_Dt = calc_dayofyear();
-//====================== SAVE PURCHASE ==========================
-  const handleSavePurchase = async () => {
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Local state for editable fields
+  const [amountPaid, setAmountPaid] = useState<number>(totals.paid_amt || 0);
+  const [mobileNumber, setMobileNumber] = useState<string>(totals.bch_mbl || "");
 
+
+  //====================== SAVE PURCHASE ==========================
+  const handleSavePurchase = async () => {
     try {
       setError(null);
-
+      setIsLoading(true);
+//=============================== generate tran id ========
+      // const trn_dt = 20260116; // YYYYMMDD
+      const trn_dt = parseInt(calc_dayofyear());
+      console.log(' API next......');
+      const apiResp = await api.post("/api/pos/get_next_trnseq", {
+        brn_cd: gVars.gBrn_Cd,
+        trn_dt: trn_dt,
+      });
+      console.log(' API after....');
+      const pur_idd = await apiResp.json();
+      console.log(pur_idd);
+      //=============================================================
       const tranPayload = {
-        pur_Tots: {
-          pur_id: "0012601160001",
+        purTots: {    // Changed from pur_Tots to purTots (match API)
+          pur_id: pur_idd,
           brn_cd: gVars.gBrn_Cd,
-          pur_dt: '2026-01-16', //wTrn_Dt,
-          vnd_id: 210003, //totals.vnd_ac_no,
+          pur_dt: '2026-01-16',
+          vnd_id: 210003,
           tot_itms: totals.bch_items,
           tot_qty: totals.bch_qty,
           tot_amt: totals.bch_amt,
-          amt_paid: totals.paid_amt,
-          amt_cr: totals.net_amt,
+          amt_paid: amountPaid, // Use local state
+          amt_cr: totals.bch_amt - amountPaid, // Calculate credit amount
           inp_by: gVars.gUser,
         },
-        pur_Itms: items,
-//        tran_dt:  '2026-01-16T00:00:00.000Z',
-        tran_dt:  '2026-01-16',
+        purchaseItms: items, // Changed from pur_Itms to purchaseItms (match API)
+        tran_dt: '2026-01-16',
         branchCode: gVars.gBrn_Cd,
-      };        
-//        YYYY-MM-DDThh:mm:ss.sssZ  ISO date
+      };
 
-console.log("tran     Payload");
+      console.log("Transaction Payload:", tranPayload);
 
-console.log(tranPayload.pur_Tots);
-
-      // Different API endpoint for purchases
       const apiResponse = await api.post("/api/pos/save_purchase", tranPayload);
       const data = await apiResponse.json();
 
-      if (!apiResponse.ok || !data.success)
+      if (!apiResponse.ok || !data.success) {
         throw new Error(data.message || "Failed to save purchase");
+      }
 
       router.push(`/pos/purchase-bill/${data.pur_id}`);
-      finalizeSale;
+      finalizeSale();
     } catch (error) {
       console.error("Error Saving Purchase:", error);
       setError(
         error instanceof Error ? error.message : "Failed to Save Purchase"
       );
+    } finally {
+      setIsLoading(false);
     }
   };
+//=======================================================================
+    useEffect(() => {
+       console.log("Paid amount updated:", totals.paid_amt);
+    }, [totals.paid_amt]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      setCurrentItem(
-        name as any,
-        name === "itm_cd" ? value : Number(value)
-      );
-    };
-    
-//====================================================================  
+  // Handle amount paid change
+  const handleAmountPaidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setAmountPaid(value);
+  };
+  // onBlur Paid Amount
+  const upd_store_paid_amt = () => {
+    updStorePaidAmt(amountPaid);
+    // console.log('aaaaaaaaaaaaaaaa');
+    // console.log(amountPaid);
+    // console.log(totals.paid_amt);
+  }
+  const upd_store_cust_mbl = () => {
+    setCustomerMobile(mobileNumber);
+  }
+  // Handle mobile number change
+  const handleMobileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, ""); // Remove non-digits
+    setMobileNumber(value);
+  };
+
   return (
     <>
-      <div className="bg-linear-to-r from-emerald-700 to-teal-600 text-white rounded-lg shadow-lg px-1 py-1 sticky bottom-0 mt-auto animate-slideUp">
+      <div className="bg-linear-to-r from-emerald-700 to-teal-600 text-white rounded-lg shadow-lg px-1 py-1 sticky bottom-0 mt-auto">
         <div className="flex grid-cols-7 gap-2 items-center">
 
           {/* ITEMS */}
@@ -113,29 +144,26 @@ console.log(tranPayload.pur_Tots);
             </div>
           </div>
 
-          {/* DISC */}
+          {/* Amount Paid - EDITABLE */}
           <div className="flex flex-col w-35">
-            <span className="text-xs opacity-80">Discount</span>
+            <span className="text-xs opacity-80">Amount Paid</span>
             <div className="bg-white/95 rounded-md p-1 text-center">
-
-          <input
-            name="itm_rsp"
-            type="number"
-            value={totals.paid_amt}
-            onChange={handleChange}
-            className="w-full p-1 border rounded"
-          />
-              {/* <span className="text-emerald-700 text-base">
-                {totals.paid_amt.toFixed(2)}
-              </span> */}
+              <input
+                name="amt_paid"
+                type="number"
+                value={amountPaid}
+                onChange={handleAmountPaidChange}
+                onBlur={upd_store_paid_amt}
+                className="w-full text-emerald-700 text-center text-base"
+                step="0.01"
+                min="0"
+              />
             </div>
           </div>
 
-
-
-          {/* NET */}
+          {/* NET / Credit Amount */}
           <div className="flex flex-col w-35">
-            <span className="text-xs opacity-80">Net</span>
+            <span className="text-xs opacity-80">Credit</span>
             <div
               className={`rounded-md p-1 text-center ${
                 returnMode ? "bg-red-900" : "bg-white/95"
@@ -146,23 +174,22 @@ console.log(tranPayload.pur_Tots);
                   returnMode ? "text-red-100" : "text-emerald-700"
                 }`}
               >
-                {totals.bch_amt.toFixed(2)}
+                {(totals.bch_amt - amountPaid).toFixed(2)}
               </span>
             </div>
           </div>
 
-          {/* MOBILE */}
-          <div className="flex flex-col w-45">
+          {/* MOBILE - EDITABLE */}
+          <div className="flex flex-col w-40">
             <span className="text-xs opacity-80">Mobile</span>
             <input
-              type="tel"
-              value={totals.bch_mbl}
+              type="text"
+              value={mobileNumber}
               maxLength={15}
-              onChange={(e) =>
-                totals.bch_mbl =(e.target.value.replace(/\D/g, ""))
-              }
+              onChange={handleMobileChange}
+              onBlur={upd_store_cust_mbl}
               placeholder="03XX-XXXXXXX"
-              className="p-1 rounded-md bg-white/95 text-emerald-700 text-center"
+              className="w-full p-1 border rounded-md bg-white/95 text-emerald-700 text-center"
             />
           </div>
 
@@ -170,52 +197,25 @@ console.log(tranPayload.pur_Tots);
           <div className="flex flex-col justify-end">
             <button
               onClick={handleSavePurchase}
-              disabled={isLoading}
-              className="bg-emerald-900 mt-4 text-white px-4 py-1.5 rounded-md font-bold disabled:opacity-40"
+              disabled={isLoading || items.length === 0}
+              className="bg-emerald-900 mt-4 text-white px-4 py-1.5 rounded-md font-bold disabled:opacity-40 hover:bg-emerald-800 transition-colors"
             >
               {isLoading
                 ? "Processing..."
                 : returnMode
                 ? "💾 Save Return"
-                : "💾 Save"} 
+                : "💾 Save"}
             </button>
           </div>
         </div>
-      </div>
 
-      <style jsx>{`
-        @keyframes slideUp {
-          from {
-            transform: translateY(10px);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
-        }
-        .animate-slideUp {
-          animation: slideUp 0.3s ease-out;
-        }
-      `}</style>
+        {/* Error Message */}
+        {error && (
+          <div className="mt-2 bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-sm">
+            {error}
+          </div>
+        )}
+      </div>
     </>
   );
 }
-
-    // Validate vendor selection
-    // if (!selectedVendor) {
-    //   setError("Please select a vendor before saving the purchase");
-    //   return;
-    // }
-
-    // // Validate amount paid
-    // const paidAmount = parseFloat(amountPaid) || 0;
-    // if (paidAmount < 0) {
-    //   setError("Amount paid cannot be negative");
-    //   return;
-    // }
-
-    // if (paidAmount > totals.sal_amt) {
-    //   setError("Amount paid cannot exceed total purchase amount");
-    //   return;
-    // }
