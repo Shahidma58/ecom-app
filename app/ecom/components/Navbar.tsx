@@ -6,8 +6,8 @@ import { usePathname } from "next/navigation";
 import { FaRegUser } from "react-icons/fa";
 import { IoCartOutline } from "react-icons/io5";
 import { GrDeliver } from "react-icons/gr";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
+// import { useSelector } from "react-redux";
+// import { RootState } from "@/redux/store";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -15,8 +15,8 @@ const Navbar = () => {
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  const cartItems = useSelector((state: RootState) => state.cart.items);
-  const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  // const cartItems = useSelector((state: RootState) => state.cart.items);
+  // const totalQuantity = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   const menuItems = [
     { name: "Home", path: "/" },
@@ -101,11 +101,11 @@ const Navbar = () => {
               className="text-gray-600 hover:text-blue-600 flex items-center space-x-1 relative">
               <IoCartOutline className="h-5 w-5" />
               {/* Badge */}
-              {totalQuantity > 0 && (
+              {/* {totalQuantity > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
                   {totalQuantity}
                 </span>
-              )}
+              )} */}
             </Link>
             <Link
               href="/login"

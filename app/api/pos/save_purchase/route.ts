@@ -2,8 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { withAuth } from "@/app/lib/authMiddleware";
+//import { Pur_Batch } from "@/app/zu_store/purch_store";
 
-interface PurchaseItem {
+interface purch_Tots {
+  pur_id: string;
+  brn_cd: number;
+  pur_dt: Date | string; // Accept both Date and string
+  vnd_id: number;
+  tot_itms: number;
+  tot_qty: number;
+  tot_amt: number;
+  amt_paid: number;
+  amt_cr: number;
+  inp_by: string;
+  inp_dt?: Date | string; // Make optional
+}
+interface purch_Itms {
   itm_cd: number; // BARCODE
   itm_desc: string;
   itm_rsp: number;
@@ -15,206 +29,226 @@ interface PurchaseItem {
   itm_tax?: number;
 }
 
-interface PurchaseTotals {
-  sal_id: number;
-  sal_dt: Date;
-  sal_qty: number;
-  sal_amt: number;
-  sal_items: number;
-  sal_disc: number;
-  inp_by: string;
-  vendor_ac_no: string;
-  vendor_name: string;
-}
-
-interface VendorData {
-  ac_no: string;
-  ac_title: string;
-  ac_gl: string;
-  ac_contact: string;
-  ac_addr: string;
-  curr_bal: string;
-}
 
 interface RequestBody {
-  purchaseTots: PurchaseTotals;
-  purchaseItms: PurchaseItem[];
-  tran_dt: number;
-  isReturn: boolean;
-  vendor: VendorData;
+  pur_Tots: purch_Tots;
+  pur_Itms: purch_Itms[];
+  tran_dt?: number;
   branchCode?: number;
-  amountPaid?: number;
 }
+
+let isReturn = false;
 
 export const POST = withAuth(async (req) => {
   try {
-    const user = req.user;
-        if (!user?.branch_code) {
-          return NextResponse.json(
-            { success: false, message: "Branch not assigned to user" },
-            { status: 401 }
-          );
-        }
+    console.log('=== API STARTED ===');
     
-    const brn_cd = user.branch_code;
-    const body: RequestBody = await req.json();
-
-    const {
-      purchaseTots,
-      purchaseItms,
-      isReturn,
-      vendor,
-      amountPaid = 0,
-    } = body;
-
-    if (!purchaseTots || !purchaseItms?.length) {
+    const user = req.user;
+    console.log('User:', user);
+    
+    if (!user?.branch_code) {
       return NextResponse.json(
-        { success: false, message: "Invalid purchase data" },
+        { success: false, message: "Branch not assigned to user" },
+        { status: 401 }
+      );
+    }
+
+    const brn_cd = user.branch_code;
+    
+    // Parse body with error handling
+    let body: RequestBody;
+    try {
+      body = await req.json();
+      console.log('Request body:', JSON.stringify(body, null, 2));
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      return NextResponse.json(
+        { success: false, message: "Invalid JSON in request body" },
         { status: 400 }
       );
     }
 
-    const purId = new Prisma.Decimal(Date.now());
-    const totalAmount = new Prisma.Decimal(purchaseTots.sal_amt);
-    const paidAmount = new Prisma.Decimal(amountPaid);
-    const creditAmount = totalAmount.minus(paidAmount);
+    const {
+      pur_Tots: purch_Tots,
+      pur_Itms: purch_Itms = [],
+    } = body;
+//=============================================
+console.log("BODY:", body);
+console.log("pur_Tots:", body.pur_Tots);
+//==============================================
+
+    // Validation
+    // if (!pur_Tots) {
+    //   console.error('Missing purTots');
+    //   return NextResponse.json(
+    //     { success: false, message: "Missing purchase totals data" },
+    //     { status: 400 }
+    //   );
+    // }
+// to be uncommented 
+    // if (!purchaseItms || !Array.isArray(purchaseItms) || purchaseItms.length === 0) {
+    //   console.error('Invalid purchaseItms:', pur_Itms);
+    //   return NextResponse.json(
+    //     { success: false, message: "Invalid or empty purchase items" },
+    //     { status: 400 }
+    //   );
+    // }
+
+    // Validate required fields in purTots
+    if (!purch_Tots.pur_id || !purch_Tots.vnd_id) {
+      console.error('Missing required fields in purTots');
+      return NextResponse.json(
+        { success: false, message: "Missing required purchase fields (pur_id, vnd_id)" },
+        { status: 400 }
+      );
+    }
+
+    console.log('Starting transaction...');
 
     const result = await prisma.$transaction(async (tx) => {
       /* ---------------- HEADER ---------------- */
-      const purchaseBatch = await tx.purch_batch.create({
+      console.log('Creating purchase batch...');
+      
+      const purchaseBatch = await tx.purch_batch_Mod.create({
         data: {
-          pur_id: purId,
-          brn_cd: brn_cd,
-          vnd_id: vendor.ac_no,
-          tot_itms: purchaseTots.sal_items,
-          tot_qty: purchaseTots.sal_qty,
-          tot_amt: totalAmount,
-          amt_paid: paidAmount,
-          amt_cr: creditAmount,
-          inp_by: purchaseTots.inp_by,
+          pur_id: purch_Tots.pur_id,
+          brn_cd: user.branch_code,
+          pur_dt: new Date(purch_Tots.pur_dt),
+          vnd_id: purch_Tots.vnd_id,
+          tot_itms: purch_Tots.tot_itms || 0,
+          tot_qty: purch_Tots.tot_qty || 0,
+          tot_amt: new Prisma.Decimal(purch_Tots.tot_amt || 0),
+          amt_paid: new Prisma.Decimal(purch_Tots.amt_paid || 0),
+          amt_cr: new Prisma.Decimal(purch_Tots.amt_cr || 0),
+          inp_by: purch_Tots.inp_by || user.username || 'system',
           inp_dt: new Date(),
-          pur_dt: new Date(purchaseTots.sal_dt),
         },
       });
 
+//      console.log('Purchase batch created:', purchaseBatch.pur_id);
+
       /* ---------------- LINE ITEMS ---------------- */
-      const purchaseDetails = await Promise.all(
-        purchaseItms.map(async (item, index) => {
-          /* 🔑 Resolve product via BARCODE */
-          const product = await tx.products_vw.findFirst({
-            where: {
-              bar_cd: item.itm_cd.toString(),
-              brn_cd: brn_cd,
-            },
-            select: {
-              prd_cd: true,
-              max_rsp: true,
-              pur_prc: true,
-            },
-          });
+      // await tx.purch_detl_Mod.createMany({
+      //   data: purch_Itms.map((item, index) => ({
+      //     pur_id: purch_Tots.pur_id,
+      //     pur_id_serl: index + 1,
 
-          if (!product) {
-            throw new Prisma.PrismaClientKnownRequestError(
-              `Product not found for barcode ${item.itm_cd}`,
-              { code: "P2025", clientVersion: "4.16.2" }
-            );
-          }
+      //     prd_cd: item.itm_cd,
+      //     brn_cd: purch_Tots.brn_cd,
 
-          return tx.purch_detl.create({
-            data: {
-              pur_id: purId,
-              pur_id_serl: index + 1,
-              prd_cd: product.prd_cd,
-              brn_cd: new Prisma.Decimal(brn_cd),
-              prd_desc: item.itm_desc,
-              pur_qty: new Prisma.Decimal(
-                isReturn ? -Math.abs(item.itm_qty) : item.itm_qty
-              ),
-              pur_prc: new Prisma.Decimal(item.itm_net_price),
-              new_rsp: new Prisma.Decimal(item.itm_rsp),
-              cur_rsp: product.max_rsp,
-              cur_pur_prc: product.pur_prc,
-              pur_dt: new Date(purchaseTots.sal_dt),
-              itm_tot_amt: new Prisma.Decimal(item.itm_amt),
-              tax_amt: item.itm_tax
-                ? new Prisma.Decimal(item.itm_tax)
-                : new Prisma.Decimal(0),
-              inp_by: purchaseTots.inp_by,
-              inp_dt: new Date(),
-            },
-          });
-        })
-      );
+      //     prd_desc: item.itm_desc,
+
+      //     pur_qty: new Prisma.Decimal(
+      //       isReturn ? -Math.abs(item.itm_qty) : item.itm_qty
+      //     ),
+
+      //     pur_prc: new Prisma.Decimal(item.itm_net_price),
+      //     new_rsp: new Prisma.Decimal(item.itm_rsp),
+
+      //     cur_rsp: new Prisma.Decimal(item.itm_rsp),       // from product
+      // //    cur_pur_prc: new Prisma.Decimal(item.cur_pur_prc),
+
+      //     pur_dt: new Date(purch_Tots.pur_dt),
+      //     itm_tot_amt: new Prisma.Decimal(item.itm_amt),
+      //     tax_amt: item.itm_tax
+      //       ? new Prisma.Decimal(item.itm_tax)
+      //       : new Prisma.Decimal(0),
+
+      //     inp_by: purch_Tots.inp_by,
+      //     inp_dt: new Date(),
+      //   })),
+      // });
 
       /* ---------------- INVENTORY UPDATE ---------------- */
-      await Promise.all(
-        purchaseItms.map(async (item) => {
-          const product = await tx.products_vw.findFirst({
-            where: {
-              bar_cd: item.itm_cd.toString(),
-              brn_cd: brn_cd,
-            },
-            select: { prd_cd: true },
-          });
+      // await Promise.all(
+      //   purchaseItms.map(async (item) => {
+      //     const product = await tx.products_vw.findFirst({
+      //       where: {
+      //         bar_cd: item.itm_cd.toString(),
+      //         brn_cd: brn_cd,
+      //       },
+      //       select: { prd_cd: true },
+      //     });
 
-          if (!product) return;
+      //     if (!product) return;
 
-          const qtyChange = isReturn
-            ? -Math.abs(item.itm_qty)
-            : item.itm_qty;
-
-          await tx.prod_info_Mod.update({
-            where: {
-              prd_cd: product.prd_cd,
-            },
-            data: {
-              prd_qoh: { increment: qtyChange },
-              pur_prc: new Prisma.Decimal(item.itm_net_price),
-              max_rsp: new Prisma.Decimal(item.itm_rsp),
-            },
-          });
-        })
-      );
+      //     const qtyChange = isReturn
+      //       ? -Math.abs(item.itm_qty)
+      //       : item.itm_qty;
+          // await tx.prod_info_Mod.update({
+          //   where: {
+          //     prd_cd_brn_cd: {
+          //       prd_cd: product.prd_cd,
+          //       brn_cd: brn_cd,
+          //     },
+          //   },
+          //   data: {
+          //     prd_qoh: { increment: qtyChange },
+          //     pur_prc: new Prisma.Decimal(item.itm_net_price),
+          //     max_rsp: new Prisma.Decimal(item.itm_rsp),
+          //   },
+          // });
+      //   })
+      // );
 
       /* ---------------- VENDOR BALANCE ---------------- */
-      if (creditAmount.greaterThan(0)) {
-        await tx.accts_Mod.update({
-          where: { ac_no: new Prisma.Decimal(vendor.ac_no) },
-          data: {
-            curr_bal: {
-              increment: isReturn
-                ? creditAmount.negated().toNumber()
-                : creditAmount.toNumber(),
-            },
-          },
-        });
-      }
+      // const creditAmount = new Prisma.Decimal(purTots.amt_cr || 0);
+      // if (creditAmount.greaterThan(0)) {
+      //   await tx.accts_Mod.update({
+      //     where: { ac_no: new Prisma.Decimal(purTots.vnd_id) },
+      //     data: {
+      //       curr_bal: {
+      //         increment: isReturn
+      //           ? creditAmount.negated().toNumber()
+      //           : creditAmount.toNumber(),
+      //       },
+      //     },
+      //   });
+      // }
 
       return purchaseBatch;
     });
+
+    console.log('Transaction completed successfully');
 
     return NextResponse.json({
       success: true,
       message: isReturn
         ? "Purchase return saved successfully"
         : "Purchase saved successfully",
-      pur_id: result.pur_id.toString(),
+      pur_id: result.pur_id,
+      data: result,
     });
   } catch (error) {
-    console.error("Error saving purchase:", error);
+    console.error("=== ERROR SAVING PURCHASE ===");
+    console.error("Error details:", error);
+    console.error("Error stack:", error instanceof Error ? error.stack : 'No stack');
 
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2025"
-    ) {
-      return NextResponse.json(
-        { success: false, message: "Product not found for barcode" },
-        { status: 404 }
-      );
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      console.error("Prisma error code:", error.code);
+      console.error("Prisma error meta:", error.meta);
+      
+      if (error.code === "P2025") {
+        return NextResponse.json(
+          { success: false, message: "Product not found for barcode" },
+          { status: 404 }
+        );
+      }
+      
+      if (error.code === "P2002") {
+        return NextResponse.json(
+          { success: false, message: "Duplicate purchase ID" },
+          { status: 400 }
+        );
+      }
     }
 
     return NextResponse.json(
-      { success: false, message: "Failed to save purchase" },
+      { 
+        success: false, 
+        message: "Failed to save purchase",
+        error: error instanceof Error ? error.message : "Unknown error"
+      },
       { status: 500 }
     );
   } finally {

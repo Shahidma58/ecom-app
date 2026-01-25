@@ -144,7 +144,7 @@ export default function useTransaction({
 
   const handleAddItem = () => {
     if (!form.itm_cd || !form.itm_desc) {
-      setError("Please fetch a valid product before adding.");
+      setError("Err: Invalid product code");
       return;
     }
 

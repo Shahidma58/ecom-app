@@ -49,18 +49,18 @@ export default function TransactionItemsTable({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-300 shadow-sm mb-3 overflow-hidden max-h-96 flex-1">
+    <div className="bg-white rounded-xl border border-gray-300 shadow-sm mb-1 overflow-hidden max-h-96 flex-1">
       <div className="overflow-auto max-h-full">
         <table className="w-full text-sm border-collapse">
-          <thead className="bg-sky-100 sticky top-0">
+          {/* <thead className="bg-sky-100 sticky top-0">
             <tr>
               <th className="bg-sky-100 px-3 py-2 text-left text-xs font-semibold text-slate-900 border-b border-gray-200 w-24">
                 {defaultHeaders.code}
               </th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-slate-900 border-b border-gray-200 w-96">
+              <th className="px-3 py-2 text-left text-xs font-semibold text-slate-900 border-b border-gray-200 w-75">
                 {defaultHeaders.description}
               </th>
-              <th className="bg-sky-100 px-3 py-2 text-center text-xs font-semibold text-slate-900 border-b border-gray-200 w-28">
+              <th className="bg-sky-100 px-3 py-2 text-center text-xs font-semibold text-slate-900 border-b border-gray-200 w-24">
                 {defaultHeaders.quantity}
               </th>
               <th className="bg-sky-100 px-3 py-2 text-right text-xs font-semibold text-slate-900 border-b border-gray-200 w-24">
@@ -79,7 +79,7 @@ export default function TransactionItemsTable({
                 {defaultHeaders.action}
               </th>
             </tr>
-          </thead>
+          </thead> */}
           <tbody className="bg-white">
             {items.length === 0 ? (
               <tr>

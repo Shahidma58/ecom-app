@@ -12,18 +12,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: "GL Code is required" }, { status: 400 });
     }
 
-    const existingAcct = await prisma.gen_Ledg_Mod.findUnique({ where: { gl_cd: Number(gl_cd) } });
+    const existingAcct = await prisma.gen_ledg_Mod.findUnique({ where: { gl_cd: Number(gl_cd) } });
 
     let result;
     if (existingAcct) {
       // 🔄 Update existing account
-      result = await prisma.gen_Ledg_Mod.update({
+      result = await prisma.gen_ledg_Mod.update({
         where: { gl_cd: Number(gl_cd) },
         data: { gl_cd, gl_desc, gl_sdesc, gl_cat, gl_type, yy_op_bal, curr_bal, gl_stat, inp_by },
       });
     } else {
       // 🆕 Create new account
-      result = await prisma.gen_Ledg_Mod.create({
+      result = await prisma.gen_ledg_Mod.create({
         data: {
           gl_cd, gl_desc, gl_sdesc, gl_cat, gl_type, 
           yy_op_bal, curr_bal, gl_stat, inp_by

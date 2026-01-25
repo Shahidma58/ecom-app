@@ -8,15 +8,15 @@ import TransactionHeader from "@/app/custom_components/transaction/TransactionHe
 import TransactionInputForm from "@/app/custom_components/transaction/TransactionInputForm";
 import TransactionItemsTable from "@/app/custom_components/transaction/TransactionItemsTable";
 import TransactionFooter from "@/app/custom_components/transaction/TransactionFooter";
-
+import { calc_dayofyear } from 'app/lib/udfs/calc_dayofyear';
 
 const gVars = { gUser: "Demo User" };
 
-const calc_dayofyear = () => {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  return Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-};
+// const calc_dayofyear = () => {
+//   const now = new Date();
+//   const start = new Date(now.getFullYear(), 0, 0);
+//   return Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+// };
 
 const get_str_date = () => new Date().toISOString().split("T")[0];
 

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { StoreProvider } from "../redux/StoreProvider";
+import { Toaster } from "sonner";
+
+//import { StoreProvider } from "../redux/StoreProvider";
 import Navbar from "./ecom/components/Navbar";
 import { AuthProvider } from "./context/AuthContext";
 const geistSans = Geist({
@@ -24,14 +26,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <StoreProvider>
+    // <StoreProvider>
       <html lang="en">
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           {/* <Navbar /> */}
           <AuthProvider>{children}</AuthProvider>
+            <Toaster position="top-right"  richColors  expand closeButton duration={2500}/>
         </body>
       </html>
-    </StoreProvider>
+    // </StoreProvider>
   );
 }
