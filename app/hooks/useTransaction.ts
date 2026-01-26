@@ -78,7 +78,7 @@ export default function useTransaction({
       setError(null);
 
     //   const data = await fetchProductApi(prd_cd);
-      const resp = await api.get(`/api/pos/get_prod?prd_cd=${prd_cd}`);
+      const resp = await api.get(`/api/pos/get_prod?bar_cd=${prd_cd}`);
 
       const data = await resp.json();
 

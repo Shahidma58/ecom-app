@@ -3,27 +3,29 @@ import { create } from "zustand";
    INTERFACES
 ========================= */
 export interface Pur_Detl {
-  itm_cd: number; // BARCODE
-  itm_desc: string
-  itm_rsp: number
-  itm_qty: number
-  itm_disc: number    // not used
-  itm_tot_amt: number 
-  itm_prc: number
-  cur_rsp: number
-  cur_pur_prc: number
-  itm_tax?: number
+  prd_cd: number;
+  itm_cd: number;
+  itm_desc: string;
+  itm_rsp: number;
+  itm_qty: number;
+  itm_disc: number;
+  itm_tot_amt: number;
+  itm_prc: number;
+  cur_rsp: number;
+  cur_pur_prc: number;
+  itm_tax?: number;
+  returnFlag?: boolean; // <-- new
 }
 
 export interface Pur_Batch {
-  bch_qty: number
-  bch_amt: number
-  bch_items: number
-  bch_disc: number
-  bch_mbl: string
-  vnd_ac_no: string
-  paid_amt: number
-  net_amt: number
+  bch_qty: number;
+  bch_amt: number;
+  bch_items: number;
+  bch_disc: number;
+  bch_mbl: string;
+  vnd_ac_no: string;
+  paid_amt: number;
+  net_amt: number;
 }
 
 /* =========================
@@ -31,18 +33,18 @@ export interface Pur_Batch {
 ========================= */
 
 const emptyItem: Pur_Detl = {
+  prd_cd: 0,
   itm_cd: 0,
   itm_desc: "",
   itm_rsp: 0,
   itm_qty: 1,
-  itm_disc: 0,   // Not Used 
-//  itm_net_price: 0,  // not used
+  itm_disc: 0,
   itm_tot_amt: 0,
-  itm_prc: 0,  // pur_prc (today's)
+  itm_prc: 0,
   cur_rsp: 0,
   cur_pur_prc: 0,
   itm_tax: 0,
-//  returnMode: false
+  returnFlag: false, // <-- default
 };
 
 const emptyTotals: Pur_Batch = {
@@ -53,7 +55,7 @@ const emptyTotals: Pur_Batch = {
   bch_mbl: "",
   vnd_ac_no: "",
   paid_amt: 0,
-  net_amt: 0
+  net_amt: 0,
 };
 
 /* =========================
@@ -61,23 +63,24 @@ const emptyTotals: Pur_Batch = {
 ========================= */
 
 const recalcItem = (item: Pur_Detl): Pur_Detl => {
-//  const net = item.itm_prc - item.itm_disc;
+  const itm_prc = item.cur_pur_prc * (item.returnFlag ? -1 : 1);
+  const itm_tot_amt = itm_prc * item.itm_qty;
+
   return {
     ...item,
-//    itm_prc: net,
-    itm_tot_amt: item.itm_prc * item.itm_qty,
+    itm_prc,
+    itm_rsp: item.cur_rsp,
+    itm_tot_amt,
   };
 };
 
 const calculateTotals = (items: Pur_Detl[]): Pur_Batch => ({
   ...emptyTotals,
-//  sal_dt: new Date(),
   bch_items: items.length,
   bch_qty: items.reduce((s, i) => s + i.itm_qty, 0),
   bch_disc: items.reduce((s, i) => s + i.itm_disc, 0),
-  bch_amt: items.reduce((s, i) => s + i.itm_prc, 0),
+  bch_amt: items.reduce((s, i) => s + i.cur_pur_prc * i.itm_qty, 0), // use cur_pur_prc
 });
-
 
 /* =========================
    STORE INTERFACE
@@ -107,6 +110,7 @@ interface PurchaseStore {
   updStorePaidAmt: (value: number) => void;
   toggleReturnMode: () => void;
   finalizeSale: () => Promise<void>;
+  toggleReturnFlag: (value: number) => void;
 }
 
 /* =========================
@@ -151,7 +155,7 @@ export const usePurchaseStore = create<PurchaseStore>((set, get) => ({
   /* ---------- CART ---------- */
   addItem: (item) => {
     const items = [...get().items];
-    const idx = items.findIndex(i => i.itm_cd === item.itm_cd);
+    const idx = items.findIndex((i) => i.itm_cd === item.itm_cd);
 
     if (idx >= 0) {
       items[idx] = recalcItem({
@@ -169,29 +173,29 @@ export const usePurchaseStore = create<PurchaseStore>((set, get) => ({
   },
 
   incrementQty: (itm_cd) => {
-    const items = get().items.map(item =>
+    const items = get().items.map((item) =>
       item.itm_cd === itm_cd
         ? recalcItem({ ...item, itm_qty: item.itm_qty + 1 })
-        : item
+        : item,
     );
 
     set({ items, totals: calculateTotals(items) });
   },
 
   decrementQty: (itm_cd) => {
-    const items = get().items
-      .map(item =>
+    const items = get()
+      .items.map((item) =>
         item.itm_cd === itm_cd
           ? recalcItem({ ...item, itm_qty: item.itm_qty - 1 })
-          : item
+          : item,
       )
-      .filter(item => item.itm_qty > 0);
+      .filter((item) => item.itm_qty > 0);
 
     set({ items, totals: calculateTotals(items) });
   },
 
   removeItem: (itm_cd) => {
-    const items = get().items.filter(i => i.itm_cd !== itm_cd);
+    const items = get().items.filter((i) => i.itm_cd !== itm_cd);
     set({ items, totals: calculateTotals(items) });
   },
 
@@ -202,14 +206,20 @@ export const usePurchaseStore = create<PurchaseStore>((set, get) => ({
       currentItem: emptyItem,
     });
   },
+  toggleReturnFlag: (itm_cd: number) => {
+    const items = get().items.map((item) =>
+      item.itm_cd === itm_cd
+        ? recalcItem({ ...item, returnFlag: !item.returnFlag })
+        : item,
+    );
+    set({ items, totals: calculateTotals(items) });
+  },
 
   /* ---------- FOOTER / FINALIZE ---------- */
 
-
   setCustomerMobile: (value) => set({ customerMobile: value }),
 
-  toggleReturnMode: () =>
-    set(state => ({ returnMode: !state.returnMode })),
+  toggleReturnMode: () => set((state) => ({ returnMode: !state.returnMode })),
 
   finalizeSale: async () => {
     const { items } = get();
@@ -219,7 +229,7 @@ export const usePurchaseStore = create<PurchaseStore>((set, get) => ({
 
     try {
       // 🔥 Replace with real API / Prisma call
-      await new Promise(res => setTimeout(res, 800));
+      await new Promise((res) => setTimeout(res, 800));
 
       set({
         items: [],

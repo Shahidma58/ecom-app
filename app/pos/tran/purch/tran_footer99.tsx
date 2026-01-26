@@ -1,30 +1,25 @@
 "use client";
 
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { api } from "../../../lib/apiClient";
 import { useRouter } from "next/navigation";
 
 import { usePurchaseStore } from "../../../zu_store/purch_store";
 import { gVars } from "@/app/app.config";
-import { calc_dayofyear } from 'app/lib/udfs/calc_dayofyear';
+import { calc_dayofyear } from "app/lib/udfs/calc_dayofyear";
 
 export default function Tran_Footer() {
-  const {
-    totals,
-    finalizeSale,
-    items,
-  } = usePurchaseStore();
+  const { totals, finalizeSale, items } = usePurchaseStore();
   const router = useRouter();
 
-//  const disabled = items.length === 0;
+  //  const disabled = items.length === 0;
   const [error, setError] = useState<string | null>(null);
   const [returnMode, setReturnMode] = useState(false);
   const [isLoading, seIsLoading] = useState(false);
   //====================================================================
   const wTrn_Dt = calc_dayofyear();
-//====================== SAVE PURCHASE ==========================
+  //====================== SAVE PURCHASE ==========================
   const handleSavePurchase = async () => {
-
     try {
       setError(null);
 
@@ -32,7 +27,7 @@ export default function Tran_Footer() {
         pur_Tots: {
           pur_id: "0012601160001",
           brn_cd: gVars.gBrn_Cd,
-          pur_dt: '2026-01-16', //wTrn_Dt,
+          pur_dt: "2026-01-16", //wTrn_Dt,
           vnd_id: 210003, //totals.vnd_ac_no,
           tot_itms: totals.bch_items,
           tot_qty: totals.bch_qty,
@@ -42,15 +37,15 @@ export default function Tran_Footer() {
           inp_by: gVars.gUser,
         },
         pur_Itms: items,
-//        tran_dt:  '2026-01-16T00:00:00.000Z',
-        tran_dt:  '2026-01-16',
+        //        tran_dt:  '2026-01-16T00:00:00.000Z',
+        tran_dt: "2026-01-16",
         branchCode: gVars.gBrn_Cd,
-      };        
-//        YYYY-MM-DDThh:mm:ss.sssZ  ISO date
+      };
+      //        YYYY-MM-DDThh:mm:ss.sssZ  ISO date
 
-console.log("tran     Payload");
+      console.log("tran     Payload");
 
-console.log(tranPayload.pur_Tots);
+      console.log(tranPayload.pur_Tots);
 
       // Different API endpoint for purchases
       const apiResponse = await api.post("/api/pos/save_purchase", tranPayload);
@@ -64,25 +59,24 @@ console.log(tranPayload.pur_Tots);
     } catch (error) {
       console.error("Error Saving Purchase:", error);
       setError(
-        error instanceof Error ? error.message : "Failed to Save Purchase"
+        error instanceof Error ? error.message : "Failed to Save Purchase",
       );
     }
   };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      setCurrentItem(
-        name as any,
-        name === "itm_cd" ? value : Number(value)
-      );
-    };
-    
-//====================================================================  
+  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const { name, value } = e.target;
+  //   setCurrentItem(
+  //     name as any,
+  //     name === "itm_cd" ? value : Number(value)
+  //   );
+  // };
+
+  //====================================================================
   return (
     <>
       <div className="bg-linear-to-r from-emerald-700 to-teal-600 text-white rounded-lg shadow-lg px-1 py-1 sticky bottom-0 mt-auto animate-slideUp">
         <div className="flex grid-cols-7 gap-2 items-center">
-
           {/* ITEMS */}
           <div className="flex flex-col w-22">
             <span className="text-xs opacity-80">Items</span>
@@ -113,26 +107,6 @@ console.log(tranPayload.pur_Tots);
             </div>
           </div>
 
-          {/* DISC */}
-          <div className="flex flex-col w-35">
-            <span className="text-xs opacity-80">Amount Paid</span>
-            <div className="bg-white/95 rounded-md p-1 text-center">
-
-          <input
-            name="itm_rsp"
-            type="number"
-            value={totals.paid_amt}
-            onChange={handleChange}
-            className="w-full p-1 border rounded"
-          />
-              {/* <span className="text-emerald-700 text-base">
-                {totals.paid_amt.toFixed(2)}
-              </span> */}
-            </div>
-          </div>
-
-
-
           {/* NET */}
           <div className="flex flex-col w-35">
             <span className="text-xs opacity-80">Net</span>
@@ -159,7 +133,7 @@ console.log(tranPayload.pur_Tots);
               value={totals.bch_mbl}
               maxLength={15}
               onChange={(e) =>
-                totals.bch_mbl =(e.target.value.replace(/\D/g, ""))
+                (totals.bch_mbl = e.target.value.replace(/\D/g, ""))
               }
               placeholder="03XX-XXXXXXX"
               //className="p-1 rounded-md bg-white/95 text-emerald-700 text-center"
@@ -177,8 +151,8 @@ console.log(tranPayload.pur_Tots);
               {isLoading
                 ? "Processing..."
                 : returnMode
-                ? "💾 Save Return"
-                : "💾 Save"} 
+                  ? "💾 Save Return"
+                  : "💾 Save"}
             </button>
           </div>
         </div>

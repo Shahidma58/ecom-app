@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { usePurchaseStore } from '../../../zu_store/purch_store';
+import { usePurchaseStore } from "../../../zu_store/purch_store";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { calc_dayofyear } from "@/app/lib/udfs";
@@ -29,22 +29,10 @@ interface VendorData {
 
 export default function Purchase01() {
   const router = useRouter();
-  const { user, accessToken, isLoading } = useAuth();
-  
-//  const wTrn_Dt = calc_dayofyear();
+  const { user, isLoading } = useAuth();
   const wStr_Dt = get_str_date();
   const [selectedVendor, setSelectedVendor] = useState<VendorData | null>(null);
-  const [amountPaid, setAmountPaid] = useState<string>("");
   const [error, setError] = useState<string>("");
-  
-  const {
-    items,
-    totals,
-    addItem,
-    incrementQty,
-    decrementQty,
-    removeItem
-  } = usePurchaseStore();
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -75,17 +63,8 @@ export default function Purchase01() {
     }
   };
 
-  const handleAmountPaidChange = (value: string) => {
-    const regex = /^\d*\.?\d{0,2}$/;
-    if (value === "" || regex.test(value)) {
-      setAmountPaid(value);
-    }
-  };
-//==================================  Page Code =================
   return (
     <>
-      {/* <Toaster position="top-right" /> */}
-      
       <div className="min-h-screen bg-gray-100 flex flex-col text-gray-800">
         <TransactionHeader
           title="AmieEMI - Purchases"
@@ -94,12 +73,11 @@ export default function Purchase01() {
           dateString={wStr_Dt}
           transactionType="purchase"
         />
-        <div className="max-w-full mt-2 mx-auto px-4 pb-3 flex-1 flex flex-col">
-          {/* Vendor Selection Component */}
+        <div className="min-h-screen mt-2  px-4 pb-3 flex-1 flex flex-col">
           <VendorSelector onVendorSelect={handleVendorSelect} />
-          <TranInputForm /> 
+          <TranInputForm />
           <TranItemsTable />
-          <Tran_Footer/>
+          <Tran_Footer />
           {error && (
             <div className="mt-3 bg-red-50 border border-red-200 text-red-800 px-4 py-2 rounded text-sm">
               {error}

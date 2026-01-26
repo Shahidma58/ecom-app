@@ -43,7 +43,7 @@ export default function ProductsManagement() {
   const fetchProduct = async () => {
     if (!form.prd_cd) return;
     try {
-      const res = await fetch(`/api/pos/prods/get_prod_mast?prd_cd=${form.prd_cd}`);
+      const res = await fetch(`/api/pos/prods/get_prod_mast?bar_cd=${form.prd_cd}`);
       const data = await res.json();
       if (data.success && data.data) {
         const p = data.data;

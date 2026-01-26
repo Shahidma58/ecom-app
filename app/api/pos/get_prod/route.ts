@@ -6,25 +6,26 @@ export const GET = withAuth(async (req: AuthenticatedRequest) => {
   try {
     const user = req.user;
     const searchParams = req.nextUrl.searchParams;
-    const prd_cd = searchParams.get("prd_cd");
+    const bar_cd = searchParams.get("bar_cd");
 
     console.log(user?.branch_code)
 
-    if (!prd_cd) {
+    if (!bar_cd) {
       return NextResponse.json(
-        { error: "prd_cd parameter is required" },
+        { error: "bar_cd parameter is required" },
         { status: 400 }
       );
     }
 
     const product = await prisma.products_vw.findFirst({
       where: {
-        bar_cd: prd_cd,
+        bar_cd: bar_cd,
         prd_qoh: { gt: 0 },
         brn_cd: user?.branch_code,
         // prd_stat: true,
       },
       select: {
+        prd_cd: true,
         prd_desc: true,
         max_rsp: true,
         min_rsp: true,
@@ -52,6 +53,7 @@ export const GET = withAuth(async (req: AuthenticatedRequest) => {
       today <= product.disc_end_dt;
 
     const responseData = {
+      prd_cd: product.prd_cd,
   prd_desc: product.prd_desc,
   max_rsp: product.max_rsp.toString(), // convert BigInt/Decimal to string
   min_rsp: product.min_rsp.toString(),

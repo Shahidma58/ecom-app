@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"     // ← MariaDB uses mysql provider
+  provider = "postgresql"    // ← MariaDB uses mysql provider
   url      = env("DATABASE_URL")
 }
 
@@ -11,6 +11,15 @@ datasource db {
 //   provider = "postgresql"
 //   url      = env("DATABASE_URL")
 // }
+
+model tran_seq_Mod {
+  brn_cd  Decimal @db.Decimal(3, 0)
+  trn_dt  Decimal @db.Decimal(6, 0)
+  trn_seq Decimal @db.Decimal(6, 0)
+
+  @@id([brn_cd, trn_dt]) 
+  @@map("tran_seq")
+}
 
 model accts_Mod {
   ac_no      Decimal  @id @db.Decimal(8, 0)
@@ -257,13 +266,7 @@ model sales_detl_hist_Mod {
 //   @@map("tran_seq")
 // }
 
-model tran_seq_Mod {
-  brn_cd  Decimal @db.Decimal(3, 0)
-  trn_dt  Decimal @db.Decimal(6, 0)
-  trn_seq Decimal @db.Decimal(6, 0)
 
-  @@id([brn_cd, trn_dt]) 
-}
 
 model Users_Mod {
   usr_id     String    @id @db.VarChar(15)
@@ -396,10 +399,10 @@ model mig_brands {
 model purch_batch_Mod {
   pur_id   String  @id @db.VarChar(20)
   brn_cd   Int
-  pur_dt   DateTime @db.Date
-  vnd_id   Decimal  @db.Decimal(6,0)
-  tot_itms Decimal  @db.Decimal(6,0)
-  tot_qty  Decimal  @db.Decimal(6,0)
+  pur_dt   DateTime? @db.Date
+  vnd_id   String       // changed from Decimal(6,0)
+  tot_itms Int          // changed from Decimal(6,0)
+  tot_qty  Int          // changed from Decimal(6,0)
   tot_amt  Decimal  @db.Decimal(14,2)
   amt_paid Decimal? @db.Decimal(14,2)
   amt_cr   Decimal? @db.Decimal(14,2)
@@ -409,10 +412,10 @@ model purch_batch_Mod {
   @@map("purch_batch")
 }
 
+
 model purch_detl_Mod {
   pur_id      String    @db.VarChar(20)
-  pur_id_serl Int
-  prd_cd      Decimal   @db.Decimal(18, 0)
+  prd_cd      String   @db.VarChar(20) // @db.VarChar(20)
   brn_cd      Decimal   @db.Decimal(3, 0)
   prd_desc    String
   pur_qty     Decimal   @db.Decimal(12, 0)
@@ -426,7 +429,7 @@ model purch_detl_Mod {
   inp_by      String
   inp_dt      DateTime? @default(now()) @db.Timestamp(6)
 
-  @@id([pur_id, pur_id_serl])
+  @@id([pur_id, prd_cd])
   @@map("purch_detl")
 }
 

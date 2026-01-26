@@ -6,24 +6,16 @@ import { api, setAccessToken } from "../../../lib/apiClient";
 import router from "next/router";
 import { useAuth } from "@/app/context/AuthContext";
 import { toast } from "sonner";
-//import { boolean } from "yup";
-import UpdatePricePopup from "./upd_prc_comp";                                
+import UpdatePricePopup from "./upd_prc_comp";
 export default function TranInputForm() {
   const { user, accessToken, isLoading } = useAuth();
-//  const {returnMode, setReturnMode} = useState(false);
   const prodRef = useRef<HTMLInputElement>(null);
   const qtyRef = useRef<HTMLInputElement>(null);
-//  const purPrcRef = useRef<HTMLInputElement>(null);
-//  const newRspRef = useRef<HTMLInputElement>(null);
-  const {
-    currentItem,
-    setCurrentItem,
-    addItem,
-    resetCurrentItem,
-    returnMode
-  } = usePurchaseStore();
-//=======================  POP UP ================
+  const { currentItem, setCurrentItem, addItem, resetCurrentItem, returnMode } =
+    usePurchaseStore();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  console.log("current item: ", currentItem);
 
   const handleOpenPopup = () => {
     setIsPopupOpen(true);
@@ -33,18 +25,17 @@ export default function TranInputForm() {
     setIsPopupOpen(false);
   };
 
-//======================================================
   useEffect(() => {
-      if (!isLoading && !user) {
-        router.push("/pos/login");
-      }
-    }, [user, isLoading, router]);
-  
-    useEffect(() => {
-      if (accessToken) {
-        setAccessToken(accessToken);
-      }
-    }, [accessToken]);
+    if (!isLoading && !user) {
+      router.push("/pos/login");
+    }
+  }, [user, isLoading, router]);
+
+  useEffect(() => {
+    if (accessToken) {
+      setAccessToken(accessToken);
+    }
+  }, [accessToken]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -55,33 +46,31 @@ export default function TranInputForm() {
       return; // Stop the update
     }
 
-    setCurrentItem(
-      name as any,
-      name === "itm_cd" ? value : Number(value)
-    );
+    setCurrentItem(name as any, name === "itm_cd" ? value : Number(value));
   };
 
-  const handleProdEnter = (prd_cd: number | string) => {
-    if (!prd_cd || prd_cd === "" || prd_cd === "0") {
+  const handleProdEnter = (bar_cd: number | string) => {
+    if (!bar_cd || bar_cd === "" || bar_cd === "0") {
       toast.error("Input Product Code sdsd ", {
-        duration:1000,
-        closeButton: true, 
-        className: "border border-red-300 bg-gray-500 text-red-800 shadow-lg rounded-lg"
+        duration: 1000,
+        closeButton: true,
+        className:
+          "border border-red-300 bg-gray-500 text-red-800 shadow-lg rounded-lg",
       });
       prodRef.current?.focus();
       return;
-    } else { qtyRef.current?.focus();}
+    } else {
+      qtyRef.current?.focus();
+    }
   };
 
-  const handleQtyEnter = (prd_cd: number | string) => {
-    if (!prd_cd || prd_cd === "" || prd_cd === "0") {
+  const handleQtyEnter = (bar_cd: number | string) => {
+    if (!bar_cd || bar_cd === "" || bar_cd === "0") {
       qtyRef.current?.focus();
       return;
-    } else { 
-//      purPrcRef.current?.focus();    
+    } else {
       addItem(currentItem);
       resetCurrentItem();
-
     }
   };
 
@@ -104,22 +93,23 @@ export default function TranInputForm() {
   //   addItem(currentItem);
   //   resetCurrentItem();
   // };
-//====================================================================  
-  const fetchProduct = async (prd_cd: number | string) => {
-    if (!prd_cd || prd_cd === "" || prd_cd === "0") {
+  //====================================================================
+  const fetchProduct = async (bar_cd: number | string) => {
+    if (!bar_cd || bar_cd === "" || bar_cd === "0") {
       prodRef.current?.focus();
       return;
     }
     try {
-    //   setLoading(true);
-    //   setError(null);
+      //   setLoading(true);
+      //   setError(null);
 
-    //   const data = await fetchProductApi(prd_cd);
-      const resp = await api.get(`/api/pos/get_prod?prd_cd=${prd_cd}`);
+      //   const data = await fetchProductApi(prd_cd);
+      const resp = await api.get(`/api/pos/get_prod?bar_cd=${bar_cd}`);
 
       const data = await resp.json();
-//console.log('aaaaaaaaaaaaaaaa BLUR oooooo');
-//      console.log(data.data);
+      console.log("data: ", data.data);
+      //console.log('aaaaaaaaaaaaaaaa BLUR oooooo');
+      //      console.log(data.data);
 
       if (data.success) {
         // const itemRsp = Number(data.data.max_rsp);
@@ -127,18 +117,19 @@ export default function TranInputForm() {
         // const discountAmt = Number(data.data.discount_amt) || 0;
         // const netPrice = itemRsp - discountAmt;
         // const itemAmt = netPrice * itemQty;
-//        setCurrentItem(itemRsp,data.data.itm_rsp);
-        setCurrentItem("itm_desc"   ,data.data.prd_desc);
-        setCurrentItem("cur_rsp"   ,data.data.max_rsp);
-        setCurrentItem("cur_pur_prc"   ,data.data.pur_prc);
-//        setCurrentItem("new_rsp"   ,data.data.max_rsp);        
-//   itm_rsp: number;
-//   itm_qty: number;
-//   itm_disc: number;
-//   itm_net_price: number;
-//   itm_amt: number;
-//   itm_cost: number;
-//   itm_tax?: number;
+        //        setCurrentItem(itemRsp,data.data.itm_rsp);
+        setCurrentItem("prd_cd", data.data.prd_cd);
+        setCurrentItem("itm_desc", data.data.prd_desc);
+        setCurrentItem("cur_rsp", data.data.max_rsp);
+        setCurrentItem("cur_pur_prc", data.data.pur_prc);
+        //        setCurrentItem("new_rsp"   ,data.data.max_rsp);
+        //   itm_rsp: number;
+        //   itm_qty: number;
+        //   itm_disc: number;
+        //   itm_net_price: number;
+        //   itm_amt: number;
+        //   itm_cost: number;
+        //   itm_tax?: number;
 
         //   ...form,
         //   itm_desc: data.data.prd_desc,
@@ -153,18 +144,17 @@ export default function TranInputForm() {
       qtyRef.current?.select();
     } catch (error) {
       console.error("Error fetching Product:", error);
-    //   setError(
-    //     error instanceof Error ? error.message : "Failed to fetch Product"
-    //   );
-    //   setForm((prev) => ({
-    //     ...prev,
-    //     itm_desc: "",
-    //     itm_disc: 0,
-    //     itm_net_price: 0,
-    //   }));
+      //   setError(
+      //     error instanceof Error ? error.message : "Failed to fetch Product"
+      //   );
+      //   setForm((prev) => ({
+      //     ...prev,
+      //     itm_desc: "",
+      //     itm_disc: 0,
+      //     itm_net_price: 0,
+      //   }));
     } finally {
-
-//      setLoading(false);
+      //      setLoading(false);
     }
   };
   // useEffect(() => {
@@ -173,7 +163,7 @@ export default function TranInputForm() {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-300 p-1 mb-1">
       <div className="flex items-end gap-1 text-sm">
-{/* // CURRENT ITEM ---change this--------- */}
+        {/* // CURRENT ITEM ---change this--------- */}
         {/* CODE */}
         <div className="w-32">
           <label className="text-xs">Product Code</label>
@@ -182,7 +172,9 @@ export default function TranInputForm() {
             value={currentItem.itm_cd || ""}
             onChange={handleChange}
             onBlur={() => fetchProduct(currentItem.itm_cd)}
-            onKeyDown={(e) => e.key === "Enter" && handleProdEnter(currentItem.itm_cd)}
+            onKeyDown={(e) =>
+              e.key === "Enter" && handleProdEnter(currentItem.itm_cd)
+            }
             className="w-full p-1 border rounded"
             ref={prodRef}
           />
@@ -237,16 +229,31 @@ export default function TranInputForm() {
           />
         </div>
 
+        <div className="flex-none w-20 relative group">
+          <button
+            onClick={() => setIsPopupOpen(true)}
+            className="w-full bg-blue-600 hover:bg-blue-700  
+    text-xs text-white py-2 px-3 rounded-lg shadow-sm 
+    font-medium transition-colors duration-150"
+          >
+            Update
+          </button>
 
-        <div className="flex-none w-20 max-h20">
-        <button
-          onClick={() => setIsPopupOpen(true)}
-          className="bg-blue-600 hover:bg-blue-500 text-sm text-white py-1.5 px-2 
-          rounded-md shadow-md font-semibold"
-        >
-        Upd Price
-        </button>        </div>
-{/* =================================================== */}
+          {/* Tooltip */}
+          <div
+            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 
+    bg-gray-900 text-white text-xs rounded-md whitespace-nowrap
+    opacity-0 group-hover:opacity-100 transition-opacity duration-200 
+    pointer-events-none z-10"
+          >
+            Update Price
+            <div
+              className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 
+      border-4 border-transparent border-t-gray-900"
+            ></div>
+          </div>
+        </div>
+        {/* =================================================== */}
         {/* QTY */}
         <div className="w-15">
           <label className="text-xs">Qty</label>
@@ -255,12 +262,13 @@ export default function TranInputForm() {
             type="number"
             value={currentItem.itm_qty}
             onChange={handleChange}
-            onKeyDown={(e) => e.key === "Enter" && handleQtyEnter(currentItem.itm_qty)}
+            onKeyDown={(e) =>
+              e.key === "Enter" && handleQtyEnter(currentItem.itm_qty)
+            }
             className="w-full p-1 border rounded"
             ref={qtyRef}
           />
         </div>
-
 
         {/* TOTAL */}
         <div className="w-28">
@@ -289,28 +297,11 @@ export default function TranInputForm() {
             {defaultLabels.returnButton}
           </button>
         </div>)} */}
-
-        <div className="flex-none w-16">
-          {/* <label className="text-xs font-medium text-gray-600 mb-1 block opacity-0">
-            Action
-          </label> */}
-          <button
-            className={`w-full px-2 py-1.5 text-sm font-semibold rounded-md border-none cursor-pointer transition-all ${
-              returnMode
-                ? "bg-red-600 text-white shadow-md shadow-red-600/40"
-                : "bg-amber-500 text-white hover:bg-amber-600"
-            }`}
-//            onClick={""}
-            type="button"
-          >
-            Return
-          </button>
-        </div>
       </div>
-{/* //=========================================================== */}
+      {/* //=========================================================== */}
       {/* Popup Component - appears on top right */}
-      <UpdatePricePopup 
-        isOpen={isPopupOpen} 
+      <UpdatePricePopup
+        isOpen={isPopupOpen}
         onClose={() => setIsPopupOpen(false)}
         initialData={{
           bar_cd: "123456",
@@ -320,8 +311,7 @@ export default function TranInputForm() {
           max_rsp: "150",
         }}
       />
-{/* //========================================================= */}
-
+      {/* //========================================================= */}
     </div>
   );
 }
